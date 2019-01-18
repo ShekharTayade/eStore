@@ -1,0 +1,18 @@
+					{% for f in frames_with_image %}
+					<div class="col-lg-2 col-md-4">
+						<div class = "prod-details">
+							{% with 'img/'|add:f.url as image_static %}
+							<div class="frame-image"  style="margin:0px 2px 0px 2px !important;">
+								<a onclick = "applyFrame('{{f.frame_id}}', '{{f.border_slice}}', '{% static image_static %}')"> 
+									<img src="{% static image_static %}" alt="{{f.frame__name}}" class="img-fluid">
+								</a>
+								<div class="text text-center">
+									<h5>
+										<a onclick = "applyFrame('{{f.frame_id}}','{{f.border_slice}}', '{% static image_static %}')">{{ f.frame.name }}</a>
+									</h5>
+								</div>
+							</div>
+							{% endwith %}
+						</div>
+					</div>
+					{% endfor %}

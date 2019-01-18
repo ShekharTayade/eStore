@@ -1,0 +1,46 @@
+{% load static %}
+{% if prod_collections %}
+<!-- Collections -->
+<div id="collections">
+	<div class="box py-2">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h2 class="mb-0 text-center">Explore Collections</h2>
+					<div class = "text-center">
+						<span class = "section-text">
+							We have a wide variety of art in our collection.<br/>
+							Browse the collections, select the art you like, and we will deliver it to you.
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END - collection header -->
+</div>
+
+<div class="container">
+	<div class="row" style = "margin-bottom: 15px">
+		<div class="collection-slider owl-carousel owl-theme">
+			{% for c in prod_collections %}
+			<div class = "item" style="margin:0px 2px 0px 2px !important;">
+			<!-- Collection Slider -->
+				<a href= "{% url 'show_collection' c.collection_id %}">
+					{% with 'img/'|add:c.url as image_static %}
+					<img src="{% static image_static %}" alt="Collection-Img" class="img-fluid main-slider-img">
+					{% endwith %}
+				</a>
+				<div class="collection-header">
+					{{ c.name }}
+				</div>
+				<div class="collection-text">
+					{{c.description}}
+				</div>
+			</div>
+			{% endfor prod_collections %}
+		</div>
+		<!-- Collections Slider -->
+	</div>
+</div>
+{% endif %}

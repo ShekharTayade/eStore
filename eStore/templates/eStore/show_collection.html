@@ -1,0 +1,187 @@
+{% extends 'eStore/ecom_index.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li class="breadcrumb-item"><a href= "{% url 'index' %}">Collections</a></li>
+							<li aria-current="page" class="breadcrumb-item active">{{coll.name}}</li>
+						</ol>
+					</nav>
+				</div>
+
+				<div class="col-lg-3">
+					 <!--
+					 *** CATEGORIES AND FILTERS ***
+					_________________________________________________________
+					-->
+					<div class="card sidebar-menu mb-4">
+						<div class="card-header">
+							<h3 class="h4 card-title">Collections</h3>
+						</div>
+						<div class="card-body">
+							<ul class="nav nav-pills flex-column category-menu">
+								<li><span class="badge badge-secondary">{{all_collections.count}}</span>
+								{% for p in all_collections %}
+									<ul class="list-unstyled">
+										<li><a href="#" class="nav-link">{{p.name}}</a></li>
+									</ul>
+								{% endfor all_collections %}
+								</li>
+							</ul>
+						</div>
+					</div>
+			  
+					<!-- Display the filters -->
+					{% for a in prod_filter_names %}
+					<div class="card sidebar-menu mb-4">
+						<div class="card-header">
+							<h3 class="h4 card-title">{{ a.name }} <a href="#" class="btn btn-sm btn-danger pull-right"><i class="fa fa-times-circle"></i> Clear</a></h3>
+						</div>
+					</div>
+					<div class="card-body">
+
+						<form id= "f_{{a.name}}" role="form" method="POST">
+							{% for f in prod_filter_values %}
+							{% if f.name == a.name %}
+							<div class="form-group">
+								<div class="checkbox">
+									<label>
+									<input type="checkbox">{{f.name}}
+									</label>
+								</div>
+							</div>
+							{% endif %}
+							{% endfor prod_filter_values %}
+							<button type = "submit" class="btn btn-default btn-sm btn-primary"><i class="fa fa-pencil"></i> Apply</button>
+						</form>
+					</div>
+					{% endfor prod_filter_names %}
+					
+					<div class="banner">
+						<a href="#"><img src="" alt="Sales 2018" class="img-fluid"></a>
+					</div>
+
+					<!-- *** CATEGORIES AND FILTERS END ***-->
+				</div>
+				<!-- /.col-md-3-->
+	
+
+
+				<div class="col-lg-9">
+					<div class="box">
+						<h1>{{ coll.name }}</h1>
+						<p>{{ coll.description }}</p>
+					 </div>
+					 
+					<!-- Category header -->
+					<div class="box info-bar">
+						<div class="row">
+
+							<div class="col-md-12 col-lg-12 products-number-sort">
+								<form class="form-inline d-block d-lg-flex justify-content-between flex-column flex-md-row">
+									<div class="products-number">
+										<strong>Show</strong><a href="?page={{prods.number}}&sort={{sortOrder}}&show=10" class="btn btn-sm {% if show == '10' or show == None %} btn-primary {% else %} btn-outline-secondary {% endif %}">10</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=25" class="btn btn-sm {% if show == '25' %} btn-primary {% else %} btn-outline-secondary {% endif %}">25</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=ALL" class="btn btn-sm {% if show == 'ALL' %} btn-primary {% else %} btn-outline-secondary {% endif %}">All</a><span>results/page</span>
+									</div>
+									<div class = "pull-right">
+										<div id = "sortOrder" class="products-sort-by mt-2 mt-lg-0">
+											<strong>Sort by</strong>
+											Price 
+											<a href= "?page={{prods.number}}&sort=PRICEUP&show={{show}}"><i class = "fa fa-arrow-circle-up fa-2x"></i><small>Low to High</small></a>
+											<a href= "?page={{prods.number}}&sort=PRICEDOWN&show={{show}}"><i class = "fa fa-arrow-circle-down fa-2x"></i><small>High to Low</small></a>
+										</div>
+									</div>
+								</form>
+							</div>
+
+						</div>
+					</div>
+
+					<small>{{prods_pg.paginator.count}} results found</small>
+					<div class="row products">
+						{% for prod in prod_collections %}
+						<div class="col-lg-4 col-md-6">
+							<div class="flip-container">
+								<div class="flipper">
+									{% with 'img/'|add:prod.url as image_static %}
+									<div class="front">
+										<a href="{% url 'product_details' prod.product_id %}">
+											<img src="{% static image_static %}" alt="" class="img-fluid gallary-img">
+										</a>
+									</div>
+
+									{% endwith %}
+								</div>
+							</div>
+							<div class="text text-center">
+								<h3><a href="">{{prod.name}}</a></h3>
+								<p class="price"> 
+									<del></del><p class="price">{{prod.price}}</p>
+								</p>
+								<p class="buttons">
+									<a href="{% url 'product_details' prod.product_id %}" class="btn btn-outline-secondary">View detail</a>
+									<button class="btn btn-primary" onclick="addProdToCart({{prod.product_id}}, 1)"><i class="fa fa-shopping-cart"></i>Add to cart</button>
+								</p>
+							</div>
+							<!-- /.text-->
+							{% if prod.1 == "X" %}
+							<div class="ribbon sale">
+								<div class="theribbon">SALE</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+							{% if prod.1 == "X" %}
+							<div class="ribbon new">
+								<div class="theribbon">NEW</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+							{% if prod.1 == "X" %}
+							<div class="ribbon gift">
+								<div class="theribbon">GIFT</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+						</div>
+						<!-- END of Products -->
+						{% endfor prod_collections %}
+					</div>
+
+					<div class="box info-bar">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 products-showing">
+								<div class = "text-center">
+									{% if prods_pg.has_previous %}
+										<a class="btn btn-sm btn-primary" href="?page=1&sort={{sortOrder}}&show={{show}}">&laquo; First</a>
+										<a class="btn btn-sm btn-primary"  href="?page={{ prods.previous_page_number }}&sort={{sortOrder}}&show={{show}}">Prev</a>
+									{% else %}
+										<a class="btn btn-sm btn btn-primary disabled" href="#">&laquo; First</a>
+										<a class="btn btn-sm btn btn-primary disabled"  href="#">Prev</a>
+									{% endif %}
+									Showing Page {{ prods_pg.number }} of {{ prods_pg.paginator.num_pages }}
+									{% if prods_pg.has_next %}
+										<a class="btn btn-sm btn-primary" href="?page={{ prods_pg.next_page_number }}&sort={{sortOrder}}&show={{show}}">Next</a>
+										<a class="btn btn-sm btn-primary" href="?page={{ prods_pg.paginator.num_pages }}&sort={{sortOrder}}&show={{show}}">Last &raquo;</a>
+									{% else %}
+										<a class="btn btn-sm btn-primary disabled" href="#">Next</a>
+										<a class="btn btn-sm btn-primary disabled" href="#">Last &raquo;</a>
+									{% endif %}				
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.col-lg-9-->
+			</div>
+		</div>
+	{% endblock sitecontent %}
+	

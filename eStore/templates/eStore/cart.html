@@ -1,0 +1,170 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container" id = "cart-display" >
+			{% include 'eStore/cart_include.html' %}
+			
+			<p id="info"></p>
+		</div>
+		{% include 'eStore/cart-empty-message.html' %}
+		
+		{% include 'eStore/cart-removed-message.html' %}
+
+		{% include 'eStore/show-product.html' %}
+		
+	{% endblock sitecontent %}
+
+	
+	
+	{% block jscripts %}
+	
+		<script>
+		
+		function updateItemQty(cart_item_id, val){
+			
+			var obj = JSON.parse(document.getElementById(cart_item_id).textContent);
+			
+			// add uupdated qty to the json obj
+			obj['updated_qty'] = val;
+			
+			var value = JSON.stringify(obj);
+			
+			$.ajax({
+				url: "{% url 'update_cart_item' %}", 
+				data: value, 
+				dataType: 'text', 
+				type: 'post',
+				success: function (data) {
+					data = JSON.parse(data);
+					cart_qty = data.msg;
+					//Update items in cart
+					if (data = "SUCCESS") {
+						// Update the display
+						show_cart();
+					} else {
+						alert(data);
+					}
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText); 
+				}
+			});
+			
+			
+		}
+		
+		function updateCart(){
+		
+			var rows = [];
+			var rec = [];
+			var table = $("#cartTbl tbody");
+			var myTab = document.getElementById('cartTbl');
+			
+			// LOOP THROUGH EACH ROW OF THE TABLE AFTER HEADER.
+			for (i = 1; i < myTab.rows.length; i++) {
+
+				// GET THE CELLS COLLECTION OF THE CURRENT ROW.
+				var objCells = myTab.rows.item(i).cells;
+
+				// LOOP THROUGH EACH CELL OF THE CURENT ROW TO READ CELL VALUES.
+				//for (var j = 0; j < objCells.length; j++) {
+					info.innerHTML = info.innerHTML + ' ' + objCells.item(3).innerHTML;
+				//}
+				//info.innerHTML = info.innerHTML + '<br />';     // ADD A BREAK (TAG).
+			}
+					
+
+			var $table = $("#cartTbl");
+			var tabData = JSON.stringify($table.bootstrapTable('getData'));
+			
+			 // Get all data to be saved
+			table.find('tr').each(function (i, el) {
+				var $tds = $(this).find('td');
+				var prod_id = $tds.eq(0).text();
+				var qty = $tds.eq(3).text();
+				var item_price = $tds.eq(4).text();
+			
+				rec = [prod_id, qty, item_price];
+				rows.push(rec);
+			});		
+			
+			console.log(rows);
+		}
+
+		function deleteItem(cart_item_id, sub_total, tax, cart_total, item_total){
+			
+			var conf = confirm("Are you sure you want to delete this item?!");
+			
+			if (conf) {
+				$.ajax({
+					url: "{% url 'delete_cart_item' %}", 
+					data: {'cart_item_id':cart_item_id, 'sub_total':sub_total, 'tax':tax, 
+					'cart_total':cart_total, 'item_total':item_total}, 
+					dataType: 'text', 
+					type: 'post',
+					success: function (data) {
+						data = JSON.parse(data);
+						cart_qty = data.msg;
+						//Update items in cart
+						if (data = "SUCCESS") {
+							// Update the display
+							show_cart();
+							$('#item-remove').modal('show');
+						} else {
+							alert(data);
+						}
+					},
+					error: function(xhr){
+						alert("An error occured: " + xhr.status + " " + xhr.statusText); 
+					}
+				});
+			}
+			
+		}
+
+		function show_cart(){
+		
+			// Let's update the cart view
+			$.ajax({
+				url: '{% url "show_cart" %}', 
+				dataType: 'text', 
+				type: 'POST',
+				success: function (data) {
+					$("#cart-display").html(data);
+
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText + " Apologies for the inconvenience!! Please let us know the details and we will be happy to help sort it out."); 
+					return;
+				}
+			});				
+		}
+		
+		function validate_checkout(){
+			// Get cart total
+			var cart_total = $("#cart_total").html();
+			if (cart_total == null ) {
+				$("#msg-emptycart").modal("show");
+				return false;
+			}
+			if ( parseFloat(cart_total) <= 0 ){
+				$("#msg-emptycart").modal("show");
+				return false;
+			} else {
+				return true;
+			}
+		
+		}
+		
+		function applyCoupan(v_code) {
+			console.log(v_code);
+			
+			
+		
+		}
+
+		
+		
+		</script>
+	{% endblock jscripts %}

@@ -1,0 +1,5 @@
+								{% with 'img/'|add:main_img as image_static %}
+								<div class="item img-magnifier-container"> 
+									<img id = "prod-img" src="{% static image_static %}" data-action="zoom" class="img-fluid"/>
+								</div>
+								{% endwith %}

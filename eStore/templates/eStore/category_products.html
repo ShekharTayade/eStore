@@ -1,0 +1,253 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li class="breadcrumb-item"><a href= "{% url 'index' %}">Categories</a></li>
+							<li aria-current="page" class="breadcrumb-item active">{{product_category.name}}</li>
+						</ol>
+					</nav>
+				</div>
+
+				<div class="col-lg-3">
+					 <!--
+					 *** CATEGORIES AND FILTERS ***
+					_________________________________________________________
+					-->
+					<div class="card sidebar-menu mb-4">
+						<div class="card-header">
+							<h3 class="h4 card-title">Categories</h3>
+						</div>
+						<div class="card-body">
+							<ul class="nav navbar-collapse nav-pills flex-column category-menu">
+								<li><span class="badge badge-secondary">{{prod_cat_count}}</span>
+								{% for p in prod_categories %}
+									<ul class="list-unstyled">
+										<li><a href="{% url 'category_products' p.category_id %}" class="nav-link">{{p.name|title}}</a></li>
+									</ul>
+								{% endfor prod_categories %}
+									<a href=""><small>More...</small></a>
+								</li>
+							</ul>
+						</div>
+					</div>
+			  
+					<!-- Display the filters -->
+					{% for pf in prod_filters %}
+					<div class="card sidebar-menu mb-4">
+						<div class="card-header">
+							<h3 class="h4 card-title">{{ pf|title }}</h3>
+						</div>
+					
+						<div class="card-body">
+							<form id= "f_{{pf}}" role="form" method="POST">
+								{% for f in prod_filter_values %}
+								{% if f.name == pf %}
+								<div class="form-group" style="margin-bottom:0.25em !important;">
+									<div class="checkbox">
+										
+										<input class = "{{pf}}" type="checkbox" />
+										<label>{{f.value}}</label>
+									</div>
+								</div>
+								{% endif %}
+								{% endfor prod_filter_values %}
+								<button type = "button" class="btn btn-secondary btn-sm btn-primary" onclick = "getAllFilters()"><i class="fa fa-pencil"></i> Apply</button>
+								<button type = "button" class="btn btn-sm btn-outline-secondary pull-right" onclick = "clearFilter('{{pf}}')"><i class="fa fa-times-circle"></i> Clear</button>
+							</form>
+						</div>
+					</div>
+					{% endfor prod_filters %}
+					
+					<div class="banner">
+						<a href="#"><img src="" alt="Sales 2018" class="img-fluid"></a>
+					</div>
+
+					<!-- *** CATEGORIES AND FILTERS END ***-->
+				</div>
+				<!-- /.col-md-3-->
+	
+
+
+				<div class="col-lg-9">
+					<div class="box-cat">
+						<h1>{{ product_category.name }}</h1>
+						<p>{% if product_category.description %} {{product_category.description}} {% endif %}</p>
+					 </div>
+					 
+					<!-- Category header -->
+					<div class="box-cat info-bar">
+						<div class="row">
+
+							<div class="col-md-12 col-lg-12 products-number-sort">
+								<form class="form-inline d-block d-lg-flex justify-content-between flex-column flex-md-row">
+									<div class="products-number">
+										<strong>Show</strong><a href="?page={{prods.number}}&sort={{sortOrder}}&show=25" class="btn btn-sm {% if show == '25' or show == None %} btn-primary {% else %} btn-outline-secondary {% endif %}">25</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=50" class="btn btn-sm {% if show == '50' %} btn-primary {% else %} btn-outline-secondary {% endif %}">50</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=ALL" class="btn btn-sm {% if show == 'ALL' %} btn-primary {% else %} btn-outline-secondary {% endif %}">All</a><span>results/page</span>
+									</div>
+									<div class = "pull-right">
+										<div id = "sortOrder" class="products-sort-by mt-2 mt-lg-0">
+											<strong>Sort by</strong>
+											Price 
+											<a href= "?page={{prods.number}}&sort=PRICEUP&show={{show}}"><i class = "fa fa-arrow-circle-up fa-2x"></i><small>Low to High</small></a>
+											<a href= "?page={{prods.number}}&sort=PRICEDOWN&show={{show}}"><i class = "fa fa-arrow-circle-down fa-2x"></i><small>High to Low</small></a>
+										</div>
+									</div>
+								</form>
+							</div>
+
+						</div>
+					</div>
+
+					<small>{{prods.paginator.count}} results found</small>
+					<div class="row">
+						{% for prod in prods %}
+						<div class="col-lg-3 col-md-6">
+							<div class="flip-container">
+								<div class="flipper">
+									<div class="front" style = "box-shadow:0 3px 5px rgba(0, 0, 0, 0.75);">
+										<a href="{% url 'product_details' prod.product_id %}">
+											<img src="{{prod.url}}" alt="" class="img-fluid gallary-img">
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="text text-center" style = "margin-top: 10px;">
+								<h4><a href="">{{prod.name}}</a></h4>
+								<p class="price"> 
+									<del></del>
+									<p class="price">{{prod.price}}</p>
+								</p>
+								<p class="buttons">
+									<a href="{% url 'product_details' prod.product_id %}" class="btn btn-outline-secondary">View detail</a>
+									<button class="btn btn-primary" onclick="addProdToCart({{prod.product_id}}, 1)"><i class="fa fa-shopping-cart"></i>Add to cart</button>
+								</p>
+							</div>
+							<!-- /.text-->
+							{% if prod.1 == "X" %}
+							<div class="ribbon sale">
+								<div class="theribbon">SALE</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+							{% if prod.1 == "X" %}
+							<div class="ribbon new">
+								<div class="theribbon">NEW</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+							{% if prod.1 == "X" %}
+							<div class="ribbon gift">
+								<div class="theribbon">GIFT</div>
+								<div class="ribbon-background"></div>
+							</div>
+							<!-- /.ribbon-->
+							{% endif %}
+						</div>
+						<!-- END of Products -->
+						{% endfor prods_by_category %}
+					</div>
+
+					<div class="box info-bar">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 products-showing">
+								<div class = "text-center">
+									{% if prods.has_previous %}
+										<a class="btn btn-sm btn-primary" href="?page=1&sort={{sortOrder}}&show={{show}}">&laquo; First</a>
+										<a class="btn btn-sm btn-primary"  href="?page={{ prods.previous_page_number }}&sort={{sortOrder}}">Prev</a>
+									{% else %}
+										<a class="btn btn-sm btn btn-primary disabled" href="#">&laquo; First</a>
+										<a class="btn btn-sm btn btn-primary disabled"  href="#">Prev</a>
+									{% endif %}
+									Showing Page {{ prods.number }} of {{ prods.paginator.num_pages }}
+									{% if prods.has_next %}
+										<a class="btn btn-sm btn-primary" href="?page={{ prods.next_page_number }}&sort={{sortOrder}}&show={{show}}">Next</a>
+										<a class="btn btn-sm btn-primary" href="?page={{ prods.paginator.num_pages }}&sort={{sortOrder}}&show={{show}}">Last &raquo;</a>
+									{% else %}
+										<a class="btn btn-sm btn-primary disabled" href="#">Next</a>
+										<a class="btn btn-sm btn-primary disabled" href="#">Last &raquo;</a>
+									{% endif %}				
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.col-lg-9-->
+				
+				{% include 'eStore/cart-add-message.html' %}
+				
+			</div>
+		</div>
+	{% endblock sitecontent %}
+
+	
+	{% block jscripts %}
+
+	<script>
+		// ---- Add Product to Cart ----//
+		function addProdToCart(prod_id, qty) {
+			var cart_qty;
+			// Update the cart
+			$.ajax({
+					url: "{% url 'add_to_cart' %}", 
+					data: {'prod_id':prod_id, 'qty':qty}, 
+					dataType: 'text', 
+				success: function (data) {
+					data = JSON.parse(data);
+					cart_qty = data.cart_qty;
+					
+					//Update items in cart
+					$("#itemsincart").html(cart_qty + " items in cart"); 
+					$('#msg-modal').modal('show');
+
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText); 
+				}
+			});
+			
+		}
+
+		// Clear the filers
+		function clearFilter(ele_chx){
+			$("." + ele_chx ).each(function(){ 
+				$(this).prop('checked', false);
+			});
+		}
+		
+		// Get All the filter
+		function getAllFilters(){   
+
+			{% for pf in prod_filters %}
+				var obj = '{"{{pf}}" : ['
+				var ele = ""
+				var num = 0
+				$(".{{pf}}").each(function () {
+					var val = $(this).next('label').text();
+					var sts = $(this).is(":checked");
+					if (num == 0) {
+						ele = ele + '{"' + val + '" : "' + sts.toString() + '"}';
+					} else {
+						ele = ele + ',{"' + val + '" : "' + sts.toString() + '"}';
+					}
+					num = num + 1;
+				});
+				obj = obj + ele + ']}';
+				alert(obj);
+				tobj = JSON.parse(obj);
+				console.log(JSON.stringify(tobj));
+			{% endfor prod_filters %}
+
+		}
+	</script>
+	{% endblock jscripts %}
+			
+	

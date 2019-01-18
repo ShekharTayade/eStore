@@ -1,0 +1,31 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li aria-current="page" class="breadcrumb-item active">Import Image Data</li>
+						</ol>
+					</nav>
+				</div>
+
+
+				<div class="col-lg-9">
+					<div class="box">
+						<h1>Data for 50 images imported in the Database</h1>
+						<p></p>
+					 </div>
+				</div>
+				<!-- /.col-lg-9-->
+								
+			</div>
+		</div>
+	{% endblock sitecontent %}
+		
+	

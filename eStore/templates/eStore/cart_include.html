@@ -1,0 +1,200 @@
+{% load utils %}	
+	
+			<div class="row">
+
+				<div class="col-lg-12">
+				  <!-- breadcrumb-->
+				  <nav aria-label="breadcrumb">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+						<li aria-current="page" class="breadcrumb-item active">Shopping cart</li>
+					</ol>
+				  </nav>
+				</div>
+
+
+				<div id="cart" class="col-lg-8">
+					<div class="box">
+						<form method="post" id = "checkoutform" onsubmit = "return validate_checkout();" action="{% url 'checkout_step1_address' %}">
+							{% csrf_token %}
+							<!-- Invisible field to hold the cart id -->
+							<input hidden id = "cart_id" name = "cart_id" value = "{{ usercart.cart_id }}">
+							<!-- Hidden fields for sub_total and tax -->
+							<input hidden name = "sub_total" value = "{{sub_total}}">
+							<input hidden name = "tax" value = "{{total_tax}}">
+							<input hidden name = "disc_amt" value = "{{disc_amt}}">
+							<input hidden name = "cart_total" value = "{{usercart.cart_total}}">
+							<h1>Shopping cart</h1>
+							<p class="text-muted">You currently have {% if usercart %} {{usercart.quantity}} {% else %} 0 {% endif %} item(s) in your cart.</p>
+							<div class="table table-responsive">
+								<table id = "cartTbl" class="table table-responsive">
+									<thead>
+										<tr>
+											<th width="30%">Name</th>
+											<th width="30%">Details</th>
+											<th width="10%">Quantity</th>
+											<th width="10%">Discount</th>
+											<th width="15%">Total</th>
+											<th width="5%"></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for i in usercartitems %}
+										<tr>
+											<td><img src = "{{i.product__product_image__url}}" style = "width:75px; height:75px; object-fit:contain;">
+												<br />
+												<!-- <a href="{% url 'product_details' i.product_id %}">
+														{{i.product__name}}
+												</a> -->
+												<div class = "pull-left">
+													<button type ="button" class = "btn btn-link pull-left" onclick = "getFramedImg('{{i.product_id}}', '{{i.image_width}}', '{{i.moulding_id}}', '{{i.mount__color}}','{{i.mount_size}}', '{{i.product__product_image__url}}');">
+														{{i.product__name}}
+													</button>
+												</div>
+											</td>
+											<td>
+												{% with width=i.moulding__width_inches %}
+
+												<small>Print on {{i.print_medium_id|title}}, 
+												{% if i.moulding_id %}
+													Frame {{i.moulding__name }} Total Size: 
+													{{ i.image_width|add_width:width }}" X {{i.image_height|add_width:width }}" 
+												{% else %}
+													Image Size : {{ i.image_width }}" X {{i.image_height }}" 
+												{% endif %}
+												
+												{% if i.mount_id %}
+													, {{i.mount_size }}" {{i.mount__name|title }} Mount  
+												{% endif %}
+												{% if i.acrylic_id %}
+													, Acrylic 
+												{% endif %}
+												</small>
+												{% endwith %}
+											</td>
+											<td style = "text-align:right">
+												<input type="number" value="{{i.quantity}}" class="form-control"
+													onchange = 'updateItemQty("{{i.cart_item_id}}", $(this).val());'>
+											</td>
+											<!-- <td>{{i.product__price}}</td> -->
+											<td style = "text-align:right">
+											
+												{% if i.promotion__discount_type == "PERCENTAGE" %}
+													{{i.promotion__discount_value|floatformat}}%
+												{% else %}
+													{{i.promotion__discount_value|floatformat}}
+												{% endif %}
+											</td>
+											<td style = "text-align:right">{{i.item_total|floatformat}}</td>
+											<td>
+												<a style = "cursor: pointer;"
+													onclick="deleteItem('{{i.cart_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{usercart.cart_total|floatformat}}', '{{i.item_total|floatformat}}');">
+													
+													<i class="fa fa-trash-o"></i>
+												</a>
+											</td>
+										</tr>
+										{% endfor usercartitems %}
+									</tbody>
+									<tfoot>
+										<tr>
+											<th colspan="3">Total</th>
+											<th colspan="2" style = "text-align:right">{{usercart.cart_total|floatformat}}</th>
+											<th></th>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+							 <!-- invisible field to hold the item to be removed -->
+							<!--<div hidden id = "remove-itm">{{i.cart_item_id}</div>-->
+
+							<!--convert python data to json -->
+							{% for j in usercartitems %}
+								{{ j|json_script:j.cart_item_id }}			
+							{% endfor usercartitems %}
+							
+							<!-- /.table-responsive-->
+							<div class="box-footer d-flex justify-content-between flex-column flex-lg-row">
+								<div class="left"><a href="{% url 'index' %}" class="btn btn-outline-secondary">
+									<i class="fa fa-chevron-left"></i> Continue shopping</a>
+								</div>
+								<div class="right">
+									<!-- <button type = "button" class="btn btn-outline-secondary" onclick = "updateCart();"><i class="fa fa-refresh"></i> Update cart</button> -->
+									<button 
+										id = "checkout_btn"
+										type="submit" 
+										class="btn btn-primary" 
+										form = "checkoutform" 
+										value="submit">
+											Proceed to checkout <i class="fa fa-chevron-right"></i>
+									</button>
+								</div>
+							</div>
+						</form>
+					</div>
+					<!-- /.box-->
+
+				</div> 
+				<!-- /.col-lg-8-->
+
+					
+				<div class="col-lg-4">
+					<div id="order-summary" class="box">
+						<div class="box-header">
+							<h3 class="mb-0">Order summary</h3>
+						</div>
+						<p class="text-muted">Shipping and handing costs will be added based on the address.</p>
+						<div class="table-responsive">
+							<table class="table">
+								<tbody>
+									<tr>
+										<td>Order subtotal</td>
+										<th class="pull-right">{{sub_total|floatformat}}</th>
+									</tr>
+									<tr>
+										<td>Shipping & handling</td>
+										<th><small class="pull-right">TBD</small></th>
+									</tr>
+									<tr>
+										<td>Tax</td>
+										<th class="pull-right">{{total_tax|floatformat}}</th>
+									</tr>
+
+									<tr class="total">
+										<td>Total</td>
+										<th class="pull-right"><i class = "fa fa-inr"> </i> <span id ="cart_total" >{{usercart.cart_total|floatformat|default:"0"}}</span></th>
+									</tr>
+									<tr>
+										{% if disc_amt %}
+											<td>Your Saving</td>
+											<th id = "disc_amt" style = "color:green" class="pull-right">{{disc_amt|floatformat}}</th>
+										{% endif %}
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+										
+					<div class="box">
+						<div class="box-header">
+							<h4 class="mb-0">Coupan/eGift code</h4>
+						</div>
+						<p class="text-muted">If you have a coupon/eGift code, please enter it in the box below.</p>
+						<form>
+							<div class="input-group">
+								<input id = "v_code" type="text" class="form-control"><span class="input-group-append">
+								<button onclick = "applyCoupan($('#v_code').val());" type="button" class="btn btn-primary"><i class="fa fa-gift"></i></button></span>
+							</div>
+							<div id="coupan-text"></div>
+							<!-- /input-group-->
+						</form>
+					</div>
+				</div>
+				<!-- /.col-md-4-->
+
+			</div>
+
+			<script>
+				//update the display with number of cart items in the menu bar
+				updateCartItemsNum("{{usercart.quantity}}");
+			</script>

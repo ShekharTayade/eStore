@@ -1,0 +1,41 @@
+{% load static %}
+<div id = "headln">
+	THIS DIWALI BRING MORE HAPPINESS, DECORATE YOUR WALLS 
+</div>
+
+{% if ecom_site.show_promotion_section %}
+<!-- Set the bacground image for the main slider -->
+<div class = "container">
+	<div class = "row">
+		<div class = "col-md-12" style = "padding:0px;">
+			<div id = "main-slider-img">
+				<!-- Main Slider -->
+				<!--<div class="container">-->
+					<div class="row">
+						<div class="col-md-12">
+							<div id="main-slider" class="owl-carousel owl-theme">
+								{% for slide in slide_array %}
+								<div class="item">
+									{% with 'img/'|add:slide as image_static %}
+									<img src="{% static image_static %}" alt="Image" class="img-fluid">
+									{% endwith %}								
+								</div>
+								{% endfor slide_array %}
+							</div>
+						</div>
+					</div>
+				<!-- </div> -->
+				<!-- END: Main Slider -->
+			</div>
+		</div>
+<!--		<div class = "col-md-3" style = "padding:0px;">
+			<div class = "main-img">
+				<img src="{% static 'img/main-image/img-1-1.jpg' %}" alt="Image" class="img-fluid main-slider-img">
+			</div>
+			<div class = "main-img">
+				<img src="{% static 'img/main-image/img-2.jpg' %}" alt="Image" class="img-fluid main-slider-img">
+			</div>
+		</div>
+	</div>  -->
+</div>
+{% endif %}

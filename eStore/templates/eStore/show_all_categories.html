@@ -1,0 +1,119 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li class="breadcrumb-item"><a href= "{% url 'index' %}">Categories</a></li>
+							<li aria-current="page" class="breadcrumb-item active">{{categories.name}}</li>
+						</ol>
+					</nav>
+				</div>
+
+
+				<div class="col-lg-12">
+					<div class="box-cat">
+						<h1>All Categories</h1>
+					 </div>
+					 
+					<!-- Category header -->
+					<div class="box-cat info-bar">
+						<div class="row">
+
+							<div class="col-md-12 col-lg-12 products-number-sort">
+								<form class="form-inline d-block d-lg-flex justify-content-between flex-column flex-md-row">
+									<div class="products-number">
+										<strong>Show</strong><a href="?page={{prods.number}}&sort={{sortOrder}}&show=25" class="btn btn-sm {% if show == '25' or show == None %} btn-primary {% else %} btn-outline-secondary {% endif %}">25</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=50" class="btn btn-sm {% if show == '50' %} btn-primary {% else %} btn-outline-secondary {% endif %}">50</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=ALL" class="btn btn-sm {% if show == 'ALL' %} btn-primary {% else %} btn-outline-secondary {% endif %}">All</a><span>results/page</span>
+									</div>
+									<div class = "pull-right">
+										<input type="text" placeholder="Search" class="form-control">
+										<a data-toggle="collapse" href="#" class="btn navbar-btn d-none d-lg-inline-block"><span class="sr-only">Toggle search</span><i class="fa fa-search"></i></a>
+
+									</div>
+								</form>
+							</div>
+
+						</div>
+					</div>
+
+					<small>{{categories.paginator.count}} results found</small>
+					<div class = "row">
+					{% for c in categories %}
+					<div class="col-lg-3 col-md-6">
+						<div class="cat-card">
+							{% with 'img/'|add:c.url as image_static %}
+							<a href="{% url 'category_products' c.category_id %}">
+								<img src="{% static image_static %}" alt="" class="img-fluid img-category">
+								<h4>{{c.name|title}}</h4>
+								<!--<p>{{c.description}}</p>-->
+								<p><button class = "btn btn-primary"><span data-counter-up class="badge">{{c.product_product_category__count}}</span></button></p>
+							</a>
+							{% endwith %}
+						</div>
+					</div>
+					
+					<!--
+					<div class="row box-cat">
+						<div class="col-lg-3 col-md-6">
+						{% with 'img/'|add:c.url as image_static %} 
+						<a href="{% url 'category_products' c.category_id %}">
+							<img src="{% static image_static %}" alt="" class="img-fluid img-category">
+						</a>
+						{% endwith %}
+						</div>
+						<div class="col-lg-3 col-md-4">
+							<a href="{% url 'category_products' c.category_id %}">
+								{{c.name}}
+							</a>
+						</div>
+						<div class="col-lg-2 col-md-2">
+							<button type="button" class="btn btn-primary"> 
+								<span class="badge">{{c.product_product_category__count}}</span>
+							</button>
+						</div>
+					</div>
+					-->
+					{% endfor categories %}
+					</div>
+					<div class="box info-bar">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 products-showing">
+								<div class = "text-center">
+									{% if categories.has_previous %}
+										<a class="btn btn-sm btn-primary" href="?page=1&sort={{sortOrder}}&show={{show}}">&laquo; First</a>
+										<a class="btn btn-sm btn-primary"  href="?page={{ categories.previous_page_number }}&sort={{sortOrder}}">Prev</a>
+									{% else %}
+										<a class="btn btn-sm btn btn-primary disabled" href="#">&laquo; First</a>
+										<a class="btn btn-sm btn btn-primary disabled"  href="#">Prev</a>
+									{% endif %}
+									Showing Page {{ categories.number }} of {{ prods.paginator.num_pages }}
+									{% if categories.has_next %}
+										<a class="btn btn-sm btn-primary" href="?page={{ categories.next_page_number }}&sort={{sortOrder}}&show={{show}}">Next</a>
+										<a class="btn btn-sm btn-primary" href="?page={{ categories.paginator.num_pages }}&sort={{sortOrder}}&show={{show}}">Last &raquo;</a>
+									{% else %}
+										<a class="btn btn-sm btn-primary disabled" href="#">Next</a>
+										<a class="btn btn-sm btn-primary disabled" href="#">Last &raquo;</a>
+									{% endif %}				
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.col-lg-9-->
+				
+			</div>
+		</div>
+	{% endblock sitecontent %}
+
+	
+	{% block jscripts %}
+
+	{% endblock jscripts %}
+			
+	

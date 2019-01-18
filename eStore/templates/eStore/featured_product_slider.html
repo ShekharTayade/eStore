@@ -1,0 +1,83 @@
+				<!-- Featured Products  Header -->
+				{% if ecom_site.show_featured_section %}
+				<div id="featured-art">
+					<div class="box py-4">
+						<div class="container">
+							<div class="row">
+								<div class="col-md-12">
+									<h2 class="mb-0">{{ecom_site.featured_header}}</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- END: Featured Products  Header -->		
+
+				<!-- Featured items slider -->
+				<div class="container">
+					<div class="product-slider owl-carousel owl-theme">
+						1:{{featured_prod.count}}
+						2:{{featured_prod_img.count }}
+						{% for f in featured_prod %}
+						{% for i in featured_prod_img %}
+						<div class="item">
+							<div class="product">
+								<div class="flip-container">
+									<div class="flipper">
+										<div class="front">
+											{% with 'img/'|add:i.front_image_name as image_static %}
+											<a href="detail.html"> 
+												<img src="{% static image_static %}" alt="{{i.front_image_name}}" class="img-fluid">
+											</a>
+											{% endwith %}								
+										</div>
+										<div class="back">
+											{% with 'img/'|add:i.back_image_name as image_static %}
+											<a href="{% url 'show_prod_details' %}">
+												<img src="{% static image_static %}" alt="Image" class="img-fluid">
+											</a>
+											{% endwith %}								
+										</div>
+									</div>
+								</div>
+								{% with 'img/'|add:i.front_image_name as image_static %}
+								<a href="{% url 'show_prod_details' %}" class="invisible">
+									<img src="{% static img_static %}" alt="" class="img-fluid">
+								</a>
+								{% endwith %}
+								<div class="text">
+									<h3>
+										<a href="detail.html">{{ f.name }}</a>
+									</h3>
+									<p class="price"> 
+									  <del>{{f.del_price}}</del>{{ f.price }}
+									</p>
+								</div>
+								  <!-- /.text-->
+								  
+								{% if f.sale_tag %}
+								<div class="ribbon sale">
+									<div class="theribbon">SALE</div>
+									<div class="ribbon-background"></div>
+								</div>
+								{% endif %}
+								
+								{% if f.new_tag %}
+								<!-- /.ribbon-->
+								<div class="ribbon new">
+									<div class="theribbon">NEW</div>
+									<div class="ribbon-background"></div>
+								</div>
+								<!-- /.ribbon-->
+								{% endif %}
+				  							
+							</div>
+							<!-- /.item-->
+						</div>
+						{% endfor featured_prod_img %}
+						{% endfor featured_prod %}
+					</div>
+				</div>
+				{% endif %}
+				<!-- END: Featured items slider -->
+

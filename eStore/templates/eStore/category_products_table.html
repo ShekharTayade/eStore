@@ -1,0 +1,211 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li class="breadcrumb-item"><a href= "{% url 'show_all_categories' %}">Categories</a></li>
+							<li aria-current="page" class="breadcrumb-item active">{{product_category.name}}</li>
+						</ol>
+					</nav>
+				</div>
+
+				<div class="col-lg-3">
+
+					<button type="button" data-toggle="collapse" data-target="#cat_navigation" class="btn btn-outline-secondary navbar-toggler full-width-btn" style="width:100% !important;">
+						<span class="sr-only">Toggle navigation</span>
+						<i class="fa fa-align-justify"></i>Categories
+					</button>
+
+				
+					 <!--
+					 *** CATEGORIES AND FILTERS ***
+					_________________________________________________________
+					-->
+					<div id = "cat_navigation" class="collapse show navbar-collapse">
+						<div class="card sidebar-menu mb-4">
+							<!--<div class="card-header">
+								<h3 class="h4 card-title">Categories</h3>
+							</div>-->
+							<div class="card-body">
+								<ul class="nav navbar-collapse nav-pills flex-column category-menu pull-left">
+									<li><span class="badge badge-secondary">{{prod_cat_count}}</span>
+									{% for p in prod_categories %}
+										<ul class="list-unstyled">
+											<li><a href="{% url 'category_products' p.category_id %}" class="nav-link">{{p.name|title}}</a></li>
+										</ul>
+									{% endfor prod_categories %}
+										<a href="{% url 'show_all_categories' %}"><small>See All...</small></a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- Display the filters -->
+					<button type="button" data-toggle="collapse" data-target="#filter_navigation" class="btn btn-outline-secondary navbar-toggler full-width-btn" style="width:100% !important;">
+						<span class="sr-only">Toggle navigation</span>
+						<i class="fa fa-align-justify"></i>Filter
+					</button>
+					<div id = "filter_navigation" class="collapse show navbar-collapse">
+						<div class="card sidebar-menu mb-4">
+							<!--<div class="card-header">
+								<h3 class="h4 card-title">Filter</h3>
+							</div>-->
+							{% for pf in prod_filters %}
+							<div class="card-body">
+								<h3 class="h4 card-title">{{ pf|title }}</h3>
+								<form id= "f_{{pf}}" role="form">
+									{% for f in prod_filter_values %}
+									{% if f.name == pf %}
+									<div class="form-group" style="margin-bottom:0.25em !important;">
+										<div class="checkbox filter-class">
+												
+											<input class = "{{pf}}" type="checkbox" />
+											<label>{{f.value}}</label>
+										</div>
+									</div>
+									{% endif %}
+									{% endfor prod_filter_values %}
+									<button type = "button" class="btn btn-secondary btn-sm pull-left" onclick = "getAllFilters()"><i class="fa fa-pencil"></i> Apply</button>
+									<button type = "button" class="btn btn-sm btn-outline-secondary pull-right" onclick = "clearFilter('{{pf}}')"><i class="fa fa-times-circle"></i> Clear</button>
+								</form>
+							</div>
+							{% endfor prod_filters %}
+						</div>
+					</div>
+					
+					<!-- *** CATEGORIES AND FILTERS END ***-->
+				</div>
+				<!-- /.col-md-3-->
+	
+
+
+				<div class="col-lg-9">
+					<div class="box-cat">
+						<h1>{{ product_category.name }}</h1>
+						<p>{% if product_category.description %} {{product_category.description}} {% endif %}</p>
+					 </div>
+					 
+					<!-- Category header -->
+					<div class="box-cat info-bar">
+						<div class="row">
+
+							<div class="col-md-12 col-lg-12 products-number-sort">
+								<form class="form-inline d-block d-lg-flex justify-content-between flex-column flex-md-row">
+									<div class="products-number">
+										<strong>Show</strong><a href="?page={{prods.number}}&sort={{sortOrder}}&show=50" class="btn btn-sm {% if show == '50' or show == None %} btn-primary {% else %} btn-outline-secondary {% endif %}">50</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=100" class="btn btn-sm {% if show == '100' %} btn-primary {% else %} btn-outline-secondary {% endif %}">100</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=ALL" class="btn btn-sm {% if show == 'ALL' %} btn-primary {% else %} btn-outline-secondary {% endif %}">All</a><span>results/page</span>
+									</div>
+									<div class = "pull-right">
+										<div id = "sortOrder" class="products-sort-by mt-2 mt-lg-0">
+											<strong>Sort by</strong>
+											Price 
+											<a href= "?page={{prods.number}}&sort=PRICEUP&show={{show}}"><i class = "fa fa-arrow-circle-up fa-2x"></i><small>Low to High</small></a>
+											<a href= "?page={{prods.number}}&sort=PRICEDOWN&show={{show}}"><i class = "fa fa-arrow-circle-down fa-2x"></i><small>High to Low</small></a>
+										</div>
+									</div>
+								</form>
+							</div>
+
+						</div>
+					</div>
+
+					<div id = "img-display">
+						{% include 'eStore/prod_display_include.html' %}
+					</div> <!-- END:  img-display -->
+				</div>
+				<!-- /.col-lg-9-->
+				{% include 'eStore/cart-add-message.html' %}
+				
+			</div>
+		</div>
+	{% endblock sitecontent %}
+
+	
+	{% block jscripts %}
+
+	<script>
+		// ---- Add Product to Cart ----//
+		function addProdToCart(prod_id, qty) {
+			var cart_qty;
+			// Update the cart
+			$.ajax({
+					url: "{% url 'add_to_cart' %}", 
+					data: {'prod_id':prod_id, 'qty':qty}, 
+					dataType: 'text', 
+				success: function (data) {
+					data = JSON.parse(data);
+					cart_qty = data.cart_qty;
+					
+					//Update items in cart
+					$("#itemsincart").html(cart_qty + " items in cart"); 
+					$('#msg-modal').modal('show');
+
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText); 
+				}
+			});
+			
+		}
+
+		// Clear the filers
+		function clearFilter(ele_chx){
+			$("." + ele_chx ).each(function(){ 
+				$(this).prop('checked', false);
+			});
+		}
+		
+		// Get All the filter
+		function getAllFilters(){   
+			filter = '{';
+			fcnt = 0;
+			{% for pf in prod_filters %}
+				if (fcnt == 0) {
+					filter = filter + '"{{pf}}": { ';
+				} else {
+					filter = filter + ', "{{pf}}": { ';
+				}
+				valcnt = 0;
+				rec = ''
+				$(".{{pf}}").each(function () {
+					var val = $(this).next('label').text();
+					var sts = $(this).is(":checked");
+					if (valcnt == 0){
+						rec = rec + '"' + val.trim() + '": ' + ' " ' + sts + '"';
+					} else {
+						rec = rec + ', "' + val.trim() + '": ' + ' " ' + sts + '"';
+					}
+					valcnt = valcnt + 1;
+				});
+				filter = filter + rec + ' }';
+				fcnt = fcnt + 1;
+			{% endfor prod_filters %}
+			filter = filter + '}';
+
+			
+			$.ajax({url: '{% url "category_products" product_category.category_id %}', 
+				data: filter, 
+				dataType: 'text', 
+				type: 'POST',
+				success: function (data) {
+					//console.log(data);
+					$("#img-display").html(data);
+					//data = JSON.parse(data);
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText + " Apologies for the inconvenience!! Please let us know the details and we will be happy to help sort it out."); 
+					return;
+				}
+			});			
+			
+		}
+	</script>
+	{% endblock jscripts %}
+			
+	
