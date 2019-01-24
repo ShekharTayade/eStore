@@ -77,11 +77,17 @@ urlpatterns = [
  	url(r'^ajax/get_acrylic_price/$', views.get_acrylic_price, name='get_acrylic_price'),
  	url(r'^ajax/get_item_price/$', views.get_item_price, name='get_item_price'),
  	url(r'^ajax/get_FramedImage/$', views.get_FramedImage, name='get_framed_image'),
+ 	url(r'^ajax/apply_voucher/$', views.apply_voucher, name='apply_voucher'),
 
 	url(r'^checkout_step1/$', views.checkout_step1_address, name='checkout_step1_address'),
 	
 	url(r'^checkout_step2/$', views.checkout_saveAddr_shippingMethod, name='checkout_saveAddr_shippingMethod'),
 	url(r'^checkout_step3/$', views.checkout_step3_order_review, name='checkout_step3_order_review'),
+
+
+	
+	url(r'^promotion_products/$', views.promotion_products, name='promotion_products'),
+	
 	
 	]
 	

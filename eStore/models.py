@@ -41,6 +41,7 @@ class Ecom_site(models.Model):
 # This model stores vouchers that the Store grants.	
 class Voucher(models.Model):
 	voucher_id = models.AutoField(primary_key=True, null=False)
+	voucher_code = models.CharField(max_length = 20, null=False)
 	store = models.ForeignKey(Ecom_site, models.CASCADE)
 	effective_from = models.DateField(blank=True, null=True)
 	effective_to = models.DateField(blank=True, null=True)
@@ -57,6 +58,9 @@ class Voucher(models.Model):
 class Voucher_user(models.Model):
 	voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE, null=False)
 	user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+	effective_from = models.DateField(blank=True, null=True)
+	effective_to = models.DateField(blank=True, null=True)
+	used_date = models.DateField(blank=True, null=True)
 
 	class meta:
 		unique_together = (('voucher', 'user'),)
@@ -608,8 +612,12 @@ class Cart(models.Model):
 	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
 	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 	voucher = models.ForeignKey(Voucher, models.CASCADE, null=True)
+	voucher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	quantity = models.IntegerField(null=True)
-	cart_total = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	cart_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	cart_disc_amt  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	cart_tax  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	cart_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	updated_date =  models.DateField(blank=True, null=True)
 	cart_status = models.CharField(max_length = 2, blank=True, default='AC') #"AC" Active, "AB":Abandoned, "CO" Checked-out
 	
@@ -619,7 +627,11 @@ class Cart_item(models.Model):
 	product = models.ForeignKey(Product,on_delete=models.CASCADE, null=False)
 	promotion = models.ForeignKey(Promotion, models.CASCADE, null=True)
 	quantity = models.IntegerField(null=False)
-	item_total = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	item_unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	item_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_disc_amt  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_tax  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	moulding = models.ForeignKey(Moulding,on_delete=models.CASCADE, null=True)
 	moulding_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	print_medium = models.ForeignKey(Print_medium, models.CASCADE, null=False, default='PAPER')
@@ -649,11 +661,13 @@ class Order (models.Model):
 	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
 	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 	voucher = models.ForeignKey(Voucher, models.CASCADE, null=True)
+	vouncher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	quantity = models.IntegerField(null=True)
-	sub_total = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	tax = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	order_total = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	discount_amt = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	order_discount_amt = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	tax = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	order_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	shipping_method = models.ForeignKey(Shipping_method, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup
 	shipper = models.ForeignKey(Shipper, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup	
 	shipping_status = models. ForeignKey(Shipping_status, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup
@@ -668,7 +682,11 @@ class Order_items (models.Model):
 	moulding = models.ForeignKey(Moulding,on_delete=models.CASCADE, null=True)
 	moulding_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	quantity = models.IntegerField(null=False)
-	item_total = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	item_unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	item_sub_total = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	item_discount_amt = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_tax  = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	item_total = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	print_medium = models.ForeignKey(Print_medium, models.CASCADE, null=False, default='PAPER')
 	print_medium_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	mount = models.ForeignKey(Mount, models.CASCADE, null=True)

@@ -676,4 +676,11 @@ top #phone-help .modal-header h5 {
   color: #ffffff; 
 }
 /*   END:         Editable search *****************/
-	
+
+#login-modal a{
+	color: #555 !important;
+}
+
+#cart td {
+	font-size: 0.75rem;
+}

@@ -52,9 +52,12 @@
 								{% if f.name == pf %}
 								<div class="form-group" style="margin-bottom:0.25em !important;">
 									<div class="checkbox">
-										
 										<input class = "{{pf}}" type="checkbox" />
-										<label>{{f.value}}</label>
+										{% if pf == 'IMAGE-TYPE' %}
+											<label>{% if f.value == '1' %} Fine Print {% elif f.value == '0' %} Photo {% endif %}</label>
+										{% else %}
+											<label>{{f.value}}</label>
+										{% endif %}
 									</div>
 								</div>
 								{% endif %}

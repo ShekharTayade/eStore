@@ -22,7 +22,7 @@ def checkout_step1_address(request):
 	cart_id = request.POST.get('cart_id', '')
 	sub_total = Decimal(request.POST.get('sub_total', '0'))
 	tax = Decimal(request.POST.get('tax', '0'))	
-	disc_amt = request.POST.get('disc_amt', '')
+	disc_amt = request.POST.get('disc_amt_nv', '')
 	#discounted_amt = Decimal(request.POST.get('discounted_amt', '0'))
 	msg = ''
 
@@ -235,10 +235,10 @@ def checkout_step1_address(request):
 	shipping_addr = Order_shipping.objects.filter(order = order).select_related('pin_code', 'state', 'country').first()
 	billing_addr = Order_billing.objects.filter(order = order).select_related('pin_code', 'state', 'country').first()
 	if shipping_addr is None:
-		if user.is_authenticated:
+		if request.user.is_authenticated:
 			userObj = User.objects.get(username = request.user)
-			shipping_addr = User_shipping_address.filter(use = userObj).select_related('pin_code', 'state', 'country')
-			billing_addr = User_billing_address.filter(use = userObj).select_related('pin_code', 'state', 'country')
+			shipping_addr = User_shipping_address.objects.filter(user = userObj).select_related('pin_code', 'state', 'country')
+			billing_addr = User_billing_address.objects.filter(user = userObj).select_related('pin_code', 'state', 'country')
 	
 	country_list = Country.objects.all()
 	country_arr = []
@@ -498,10 +498,10 @@ def checkout_saveAddr_shippingMethod(request):
 		b.save()
 
 	except IntegrityError as e:
-		err_msg.append('Apologies!! Could not save your cart. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.')
+		err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.')
 
 	except Error as e:
-		err_msg.append('Apologies!! Could not save your cart. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.')
+		err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.')
 
 	
 	country_list = Country.objects.all()
@@ -533,15 +533,70 @@ def checkout_saveAddr_shippingMethod(request):
 						'disc_amt':order.discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
 						'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'order_id':order_id, 'cart_id':order.cart_id})
 	else:
-		return render(request, "eStore/checkout_step2_shipping_method.html", {'order_shipping_id': ord_shipping.order_shipping_id, 
+		return render(request, "eStore/checkout_step2_shipping_method.html", { 
 				'order_total':order.order_total, 'order_id': order_id,
 				'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,
 				'disc_amt':order.discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
 				'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'cart_id':order.cart_id})
 
 def checkout_step3_order_review(request):
-	
 
-	return render(request, "eStore/checkout_step3_order_Review.html", {})
+	order_id = request.POST.get("order_id","")
+	cart_id = request.POST.get("cart_id", "")
+	sub_total = Decimal(request.POST.get("sub_total","0"))
+	tax = Decimal(request.POST.get("tax", "0"))
+	disc_amt = Decimal(request.POST.get("disc_amt", "0"))
+	order_total = Decimal(request.POST.get("order_total","0"))
+	shipping_method = request.POST.get("shipping_method","")
+	shipping_cost = Decimal(request.POST.get("shipping_cost","0"))
+	shipper = request.POST.get("shipper","")
+	
+	if order_id == "":
+		return render(request, "eStore/checkout_step3_order_Review.html", {'msg':'NO ORDER FOUND!!'})
+	
+	order = Order.objects.get(pk = order_id)
+	order_items = Order_items.objects.filter(order = order)
+	usercartitems = Cart_item.objects.select_related('product', 'promotion').filter(cart = order.cart_id,
+		product__product_image__image_type='THUMBNAIL').values(
+		'cart_item_id', 'product_id', 'quantity', 'item_total', 'moulding_id',
+		'moulding__name', 'moulding__width_inches', 'print_medium_id', 'mount_id', 'mount__name',
+		'acrylic_id', 'mount_size', 'product__name', 'image_width', 'image_height',
+		'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color'
+		)
+	
+	# Update the order, for shipping
+	if order :
+		try:
+		
+			o = Order(
+				order_id = order_id,
+				store_id = order.store_id,
+				session_id = order.session_id, 
+				user = order.user,
+				voucher = order.voucher,
+				quantity = order.quantity,
+				order_total = order_total,
+				sub_total = sub_total,
+				tax = tax,
+				shipping_method_id = shipping_method,
+				shipper_id = shipper,	
+				shipping_status = order.shipping_status,
+				shipping_cost = shipping_cost,
+				cart = order.cart,
+				updated_date =  today,
+				discount_amt = order.discount_amt,
+				order_status = order.order_status
+			)			
+			o.save()
+	
+		except IntegrityError as e:
+			err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" and let us know. We will be glad to help you.')
+
+		except Error as e:
+			err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" and let us know. We will be glad to help you.')
+	
+	
+	return render(request, "eStore/checkout_step3_order_Review.html", {'order':o, 'order_items':order_items, 
+				'usercartitems':usercartitems})
 	
 	

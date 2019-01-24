@@ -20,21 +20,22 @@
 							<!-- Invisible field to hold the cart id -->
 							<input hidden id = "cart_id" name = "cart_id" value = "{{ usercart.cart_id }}">
 							<!-- Hidden fields for sub_total and tax -->
-							<input hidden name = "sub_total" value = "{{sub_total}}">
-							<input hidden name = "tax" value = "{{total_tax}}">
-							<input hidden name = "disc_amt" value = "{{disc_amt}}">
-							<input hidden name = "cart_total" value = "{{usercart.cart_total}}">
+							<input hidden id = "sub_total" name = "sub_total" value = "{{sub_total}}">
+							<input hidden id = "tax" name = "tax" value = "{{total_tax}}">
+							<input hidden id = "disc_amt_nv" name = "disc_amt_nv" value = "{{disc_amt}}">
+							<input hidden id = "cart_total_nv" name = "cart_total_nv" value = "{{usercart.cart_total}}">
 							<h1>Shopping cart</h1>
 							<p class="text-muted">You currently have {% if usercart %} {{usercart.quantity}} {% else %} 0 {% endif %} item(s) in your cart.</p>
 							<div class="table table-responsive">
 								<table id = "cartTbl" class="table table-responsive">
 									<thead>
 										<tr>
-											<th width="30%">Name</th>
-											<th width="30%">Details</th>
+											<th width="15%">Name</th>
+											<th width="45%">Details</th>
 											<th width="10%">Quantity</th>
-											<th width="10%">Discount</th>
-											<th width="15%">Total</th>
+											<th width="10%">Unit Price</th>
+											<th width="10%">Disc</th>
+											<th width="10%">Total</th>
 											<th width="5%"></th>
 										</tr>
 									</thead>
@@ -47,8 +48,8 @@
 														{{i.product__name}}
 												</a> -->
 												<div class = "pull-left">
-													<button type ="button" class = "btn btn-link pull-left" onclick = "getFramedImg('{{i.product_id}}', '{{i.image_width}}', '{{i.moulding_id}}', '{{i.mount__color}}','{{i.mount_size}}', '{{i.product__product_image__url}}');">
-														{{i.product__name}}
+													<button style="padding-left:0px;" type ="button" class = "btn btn-link pull-left" onclick = "getFramedImg('{{i.product_id}}', '{{i.image_width}}', '{{i.moulding_id}}', '{{i.mount__color}}','{{i.mount_size}}', '{{i.product__product_image__url}}');">
+														{{i.product__name|truncatechars:15 }}
 													</button>
 												</div>
 											</td>
@@ -76,7 +77,7 @@
 												<input type="number" value="{{i.quantity}}" class="form-control"
 													onchange = 'updateItemQty("{{i.cart_item_id}}", $(this).val());'>
 											</td>
-											<!-- <td>{{i.product__price}}</td> -->
+											<td>{{i.item_unit_price}}</td>
 											<td style = "text-align:right">
 											
 												{% if i.promotion__discount_type == "PERCENTAGE" %}
@@ -87,7 +88,10 @@
 											</td>
 											<td style = "text-align:right">{{i.item_total|floatformat}}</td>
 											<td>
-												<a style = "cursor: pointer;"
+												<a href="{% url 'product_details' i.product_id %}?cart_item_id={{i.cart_item_id}}" >
+													<i class= "fa fa-edit"></i>
+												</a>
+												<a style = "cursor: pointer; color:red;"
 													onclick="deleteItem('{{i.cart_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{usercart.cart_total|floatformat}}', '{{i.item_total|floatformat}}');">
 													
 													<i class="fa fa-trash-o"></i>
@@ -98,7 +102,7 @@
 									</tbody>
 									<tfoot>
 										<tr>
-											<th colspan="3">Total</th>
+											<th colspan="4">Total</th>
 											<th colspan="2" style = "text-align:right">{{usercart.cart_total|floatformat}}</th>
 											<th></th>
 										</tr>
@@ -141,15 +145,14 @@
 				<div class="col-lg-4">
 					<div id="order-summary" class="box">
 						<div class="box-header">
-							<h3 class="mb-0">Order summary</h3>
+							<h3 class="mb-0">Cart summary</h3>
 						</div>
-						<p class="text-muted">Shipping and handing costs will be added based on the address.</p>
 						<div class="table-responsive">
 							<table class="table">
 								<tbody>
 									<tr>
-										<td>Order subtotal</td>
-										<th class="pull-right">{{sub_total|floatformat}}</th>
+										<td>Cart subtotal</td>
+										<th class="pull-right">{{usercart.cart_sub_total|floatformat}}</th>
 									</tr>
 									<tr>
 										<td>Shipping & handling</td>
@@ -157,21 +160,29 @@
 									</tr>
 									<tr>
 										<td>Tax</td>
-										<th class="pull-right">{{total_tax|floatformat}}</th>
+										<th class="pull-right">{{usercart.cart_tax|floatformat}}</th>
 									</tr>
 
+									<tr>
+										<td>Discount</td>
+										<th id = "disc_amt" style = "color:green" class="pull-right">
+											{{usercart.cart_disc_amt|floatformat}}
+										</th>
+										 
+									</tr>									
 									<tr class="total">
 										<td>Total</td>
 										<th class="pull-right"><i class = "fa fa-inr"> </i> <span id ="cart_total" >{{usercart.cart_total|floatformat|default:"0"}}</span></th>
 									</tr>
-									<tr>
-										{% if disc_amt %}
-											<td>Your Saving</td>
-											<th id = "disc_amt" style = "color:green" class="pull-right">{{disc_amt|floatformat}}</th>
-										{% endif %}
-									</tr>
+
 								</tbody>
 							</table>
+							{% if usercart.voucher %} 
+								<div style ="color: #999; font-size: 0.59rem; text-align:right">
+									(Includes {{ usercart.voucher.voucher_code }},
+									disocunt of <i class = "fa fa-inr"></i> {{usercart.voucher_disc_amount |floatformat }})
+								</div>
+							{% endif %}
 						</div>
 					</div>
 										
@@ -183,11 +194,12 @@
 						<form>
 							<div class="input-group">
 								<input id = "v_code" type="text" class="form-control"><span class="input-group-append">
-								<button onclick = "applyCoupan($('#v_code').val());" type="button" class="btn btn-primary"><i class="fa fa-gift"></i></button></span>
+								<button onclick = "applyVoucher( '{{usercart.cart_id}}', $('#v_code').val(),'{{usercart.cart_total}}');" type="button" class="btn btn-primary"><i class="fa fa-gift"></i></button></span>
 							</div>
 							<div id="coupan-text"></div>
 							<!-- /input-group-->
 						</form>
+						<div style = "color:red" id="voucher-msg"></div>
 					</div>
 				</div>
 				<!-- /.col-md-4-->

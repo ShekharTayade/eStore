@@ -8,6 +8,7 @@ from .frame_views import *
 from .image_views import *
 from .checkout_views import *
 from .tax_views import *
+from .promotion_views import *
 
 #from .ord_views import *
 #from .shipment_views import *

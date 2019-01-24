@@ -25,10 +25,10 @@
 
 		function getFramedImg (prod_id, image_width, moulding_id, mount_color, mount_size, prod_url) {
 
-			if (moulding_id == "None" || moulding_id == '') {
-				document.getElementById("disp-img").src = prod_url;
-				$("#show-prod").modal('show');
-			} else {
+			//if (moulding_id == "None" || moulding_id == '') {
+			//	document.getElementById("disp-img").src = prod_url;
+			//	$("#show-prod").modal('show');
+			//} else {
 				// Get the framed image
 				$.ajax({
 						url: "{% url 'get_framed_image' %}", 
@@ -45,7 +45,7 @@
 					}
 				});
 
-			}
+			//}
 		}		
 		
 

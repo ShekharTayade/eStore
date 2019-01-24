@@ -1,0 +1,123 @@
+{% extends 'eStore/estore_base.html' %}
+{% load static %}
+	<!-- Only Override the site content block -->
+	{% block sitecontent %}
+        <div class="container">
+			<div class="row">
+
+				<!-- breadcrumb-->
+				<div class="col-lg-12">
+					<nav aria-label="breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li aria-current="page" class="breadcrumb-item active">Promotion</li>
+						</ol>
+					</nav>
+				</div>
+
+				<div class="col-lg-12">
+					<div class="box-cat">
+						<h1>Create New Promotion</h1>
+						<p> Select Products</P>
+					 </div>
+					 
+					<!-- Category header -->
+					<div class="box-cat info-bar">
+						<div class="row">
+
+							<div class="col-md-12 col-lg-12">
+								<div class="card sidebar-menu mb-4">
+									<div class="card-header">
+										<h3 class="card-title">Discount By:</h3>
+									</div>
+								
+									<div class="card-body">
+											<div class = "row">
+												<div class = "col-lg-5">
+													<div class="form-check-inline">
+														<label class="form-check-label" for="cash">
+															<input type="radio" class="form-check-input" id="cash" name="disc_type" value="CASH" checked>Cash amount
+														</label>
+													</div>
+													<div class="form-check-inline">
+														<label class="form-check-label" for="percentage">
+															<input type="radio" class="form-check-input" id="percetnage" name="disc_type" value="PERCENTAGE">Percentage of Item Price
+														</label>
+													</div>
+												</div>
+												<div class = "col-lg-2">
+													<input type="test" class="form-control" id="disc_type" name="disc_type">  
+												</div>
+												<div class = "col-lg-2">
+													(Enter <i class = "fa fa-inr"></i> or % value)
+												</div>
+											</div>
+									</div>
+								</div>
+							</div>
+
+								<div class = "col-md-5">
+									<div class="card mb-4">
+										<div class="card-header">
+											<h3 class="card-title">Select products for promotion by:</h3>
+										</div>
+									
+										<div class="card-body">
+												<div class="form-check-inline">
+													<label class="form-check-label" for="radio1">
+														<input type="radio" class="form-check-input" id="categories" name="selectby" value="CATEGORIES" checked>Categories
+													</label>
+												</div>
+												<div class="form-check-inline">
+													<label class="form-check-label" for="radio2">
+														<input type="radio" class="form-check-input" id="publishers" name="selectby" value="PUBLISHERS">Publishers
+													</label>
+												</div>
+												<div class="form-check-inline">
+													<label class="form-check-label">
+														<input type="radio" class="form-check-input" id="Artists" name="selectby" value="ARTISTS">Artists
+													</label>
+												</div>
+										</div>
+									</div>
+								</div>
+								<div class = "col-md-7">
+									<div class="card mb-4">
+										<div class="card-header">
+											<h3 class="card-title">Promotion Dates:</h3>
+										</div>
+									
+										<div class="card-body">
+											<form class = "form-inline">
+												<div class="form-group">
+													<label for="fromdate"> From: </label>
+													<input type="date" class="form-control" id="fromdate" name="fromdate"> 
+													
+													<label for="todate"> To: </label>
+													<input type="date" class="form-control" id="todate" name="todate">
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							
+						</div>
+						<button type = "button" class="btn btn-secondary btn-sm btn-primary" onclick = "getAllFilters()"><i class="fa fa-pencil"></i> Get Products</button>
+					</div>
+
+					<div id = "prod-display">
+					</div> <!-- END:  img-display -->
+				</div>
+				<!-- /.col-lg-9-->
+				{% include 'eStore/cart-add-message.html' %}
+				
+			</div>
+		</div>
+	{% endblock sitecontent %}
+
+	
+	{% block jscripts %}
+
+	{% endblock jscripts %}
+			
+	

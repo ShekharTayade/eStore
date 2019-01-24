@@ -53,16 +53,17 @@
 									</div>
 									<div class="price pull-right">
 										<div id = "promo-display" style = "display:none">
-											<i class="fa fa-inr" aria-hidden="true">&nbsp;</i><small id = "ori_price" style = "color:red; text-decoration: line-through;">{{prod_detail.price|floatformat}}</small>
-											<i class="fa fa-inr" aria-hidden="true">&nbsp;</i><span id = "disc_price" style = "color:green; text-decoration: underline;">{{prod_detail.price|floatformat}}</span>
+											<i class="fa fa-inr" aria-hidden="true">&nbsp;</i><small id = "item_unit_price" style = "color:red; text-decoration: line-through;">{{prod_detail.price|floatformat}}</small>
+											<i class="fa fa-inr" aria-hidden="true">&nbsp;</i><span id = "item_total_price" style = "color:green; text-decoration: underline;">{{prod_detail.price|floatformat}}</span>
 											<br /><span id = "disc" style = "font-size:0.75rem;" class = "pull-right text-muted"></span>
 										</div>	
 										<div id = "no-disc">
 											<i class="fa fa-inr" aria-hidden="true">&nbsp;</i><span id="prod-price">{{prod_detail.price|floatformat}}</span>
 										</div>
-										<div id = "total-price" style = "display:none;"></div>
-										<div id = "promotion_id" style = "display:none;"></div>
-										<div id = "discounted_amt" style = "display:none;"></div>
+										<div id = "item_unit_price_nv" style = "display:none;"></div>
+										<div id = "promotion_id_nv" style = "display:none;"></div>
+										<div id = "disc_amt_nv" ></div>
+										<div id = "item_total_price_nv" style = "display:none;"></div>
 									</div>
 								</div>
 								</div>
@@ -273,7 +274,7 @@
 		var stretch_id = '1'; // Default to '1'
 		
 		function set_moulding(m_id){
-			if (m_id != '0'  && m_id != null) {
+			if (m_id != '0'  && m_id != null && m_id != 'None') {
 				moulding_id = m_id;
 				getFramedImg ('{{prod_detail.product_id}}', moulding_id, mount_color, mount_size);
 				
@@ -294,14 +295,14 @@
 		}
 		
 		function set_mount_color(mnt_color) {
-			if (mnt_color != '' && mnt_color != null) {
+			if (mnt_color != '' && mnt_color != null && mnt_color != 'None') {
 				mount_color = mnt_color;
 			} else {
 				mount_color = '';
 			}
 			
 			mount_size = $("#mount-size").val();
-			if (moulding_id != '0' && moulding_id != '') {
+			if (moulding_id != '0' && moulding_id != '' && moulding_id != 'None') {
 				getFramedImg ('{{prod_detail.product_id}}', moulding_id, mount_color, mount_size);
 				//Calculate the price
 				calc_total_price();
@@ -318,7 +319,7 @@
 			mount_w_right = mnt_w_right
 			mount_w_top = mnt_w_top;
 			mount_w_bottom = mnt_w_bottom;
-			if (mount_size != '0' && mount_size != null ) {
+			if (mount_size != '0' && mount_size != null && mount_size != 'None') {
 				getFramedImg ('{{prod_detail.product_id}}', moulding_id, mount_color, mount_size);
 				calc_total_price();
 			}
@@ -365,14 +366,14 @@
 			}
 		}
 		function set_board(brd_id){
-			if (brd_id == '0' || brd_id == null ) {
+			if (brd_id == '0' || brd_id == null || brd_id == 'None') {
 				board_id = '0';
 			} else {
 				board_id = '{{boards.board_id}}';
 			}
 		}
 		function set_stretch(str_id){
-			if (str_id == '0' || str_id == null ) {
+			if (str_id == '0' || str_id == null || str_id == 'None') {
 				stretch_id = '0';
 			} else {
 				stretch_id = '{{stretches.stretch_id}}';
@@ -381,10 +382,7 @@
 		
 
 		// Calculate TOTAL PRICE
-		function calc_total_price(){
-
-			console.log("==========================================================");
-			
+		function calc_total_price(){			
 			var ratio = parseFloat("{{aspectratio}}"); 
 			var currwidth = parseFloat($("#size-slider").slider("value"));
 			var currheight = Math.round(currwidth / ratio);
@@ -395,8 +393,6 @@
 			
 			//Get Print Medium
 			var print_medium = $('#print-medium-select').val();
-			
-
 			
 			// Form the pricing components
 			json = '{ ' + 
@@ -420,37 +416,41 @@
 					success: function (data) {
 						data = JSON.parse(data);
 						if (data.msg == '') { 
-							console.log("TOTAL PRICE (get_item_price) = " + data.total_price);
 							if (data.disc_applied) {
 								$("#no-disc").hide();
 								$("#promo-display").show("slow");
-								$("#ori_price").html(data.item_price_withoutdisc);
-								$("#disc_price").html(data.item_price);
-								$("#total-price").html(data.item_price);
+								$("#item_unit_price").html(data.item_unit_price);
+								$("#item_total_price").html(data.item_price);
 								if ( parseInt(data.cash_disc) > 0 ) {
 									$("#disc").html("(" + data.cash_disc + " off)");
 								} else if( parseInt(data.percent_disc) > 0 ) {
 									$("#disc").html("(" + data.percent_disc + "% off)");
 								}
-								$("#promotion_id").html(data.promotion_id);
-								$("#discounted_amt").html(data.discounted_amt);
+								
+								$("#item_unit_price_nv").html(data.item_unit_price);
+								$("#promotion_id_nv").html(data.promotion_id);
+								$("#disc_amt_nv").html(data.disc_amt);
+								$("#item_total_price_nv").html(data.item_price);
 								
 							} else {
 								$("#promo-display").hide();
 								$("#no-disc").show();
 								$("#prod-price").html(data.item_price);
-								$("#total-price").html(data.item_price);
-								$("#promotion_id").html('');
-								$("#discounted_amt").html('');
+
+								$("#item_unit_price_nv").html(data.item_unit_price);
+								$("#item_total_price_nv").html(data.item_price);
+								$("#promotion_id_nv").html('');
+								$("#disc_amt_nv").html('');
 							}
 						} else {
 							alert(msg);
 								$("#promo-display").hide();
 								$("#no-disc").show();
-								$("#prod-price").html('');
-								$("#total-price").html('');
-								$("#promotion_id").html('');
-								$("#discounted_amt").html('');
+								
+								$("#item_unit_price_nv").html(data.item_unit_price);
+								$("#item_total_price_nv").html(data.item_price);
+								$("#promotion_id_nv").html('');
+								$("#disc_amt_nv").html('');
 						}
 					},
 					error: function(xhr){
@@ -501,11 +501,11 @@
 		// ---- Add Product to Cart ----//
 		function addProdToCart(prod_id, qty) {
 			var cart_qty;
-			var total_price = $("#total-price").html();
-			var cash_disc = $("#cash_disc").html();
+			var total_price = $("#item_total_price_nv").html();
 			var discount = $("#disc").html();
-			var promotion_id = $("#promotion_id").html();
-			var discounted_amt = $("#discounted_amt").html();
+			var promotion_id = $("#promotion_id_nv").html();
+			var disc_amt = $("#disc_amt_nv").html();
+			var item_unit_price = $("#item_unit_price_nv").html();
 
 			
 			var ratio = parseFloat("{{aspectratio}}"); 
@@ -533,8 +533,10 @@
 						'acrylic_id':acrylic_id, 'acrylic_size':acrylic_size,
 						'board_id':board_id, 'board_size':board_size, 'stretch_id':stretch_id,
 						'total_price':total_price, 'image_width':currwidth, 'image_height':currheight,
-						'discount':discount, 'promotion_id':promotion_id, 'discounted_amt':discounted_amt}, 
+						'discount':discount, 'promotion_id':promotion_id, 'disc_amt':disc_amt,
+						'item_unit_price':item_unit_price}, 
 				dataType: 'text', 
+					type: 'POST',
 				success: function (data) {
 					data = JSON.parse(data);
 					cart_qty = data.cart_qty;
@@ -625,30 +627,43 @@
 			var currwidth = parseFloat($("#size-slider").slider("value"));
 			var currheight = Math.round(currwidth / ratio);
 			$("#size").html("Width: " + currwidth + ", Height: " + currheight);
-			////var sqin = currwidth * currheight;
-			//var print_medium = $('#print-medium-select').val();
-			//alert(print_medium);
-			////Image price
-			//if (print_medium == "PAPER") {
-			//	if ("{{per_sqinch_paper}}" != "0") {
-			//		image_price = sqin * {{per_sqinch_paper}};
-			//		$("#prod-price").html(image_price);
-			//	} else {
-			//		alert("Init:Paper - Sorry, no price found");
-			//	}
-			//} else {
-			//	if (print_medium == "CANVAS") {
-			//		if ("{{per_sqinch_canvas}}" != "0") {
-			//			image_price = sqin * {{per_sqinch_canvas}};
-			//			$("#prod-price").html(image_price);
-			//		} else {
-			//		alert("Init:Canvas - Sorry, no price found");
-			//		}
-			//	}
-			//}	
 
-			//applyMount();
+			
+			// If this product is already in the cart, then apply that frame
+			{% if cart_item %}
+				set_print_medium('{{cart_item.print_medium_id}}');
+				document.getElementById("print-medium-select").value = '{{cart_item.print_medium_id}}';
 
+				{% if cart_item.moulding_id != "None" %}
+					set_moulding('{{cart_item.moulding_id}}');
+				{% endif %}
+				{% if cart_item.mount_id != "None" %}
+					set_mount_id('{{cart_item.mount_id}}');
+				{% endif %}
+				{% if cart_item.mount.color != "None" %}
+					set_mount_color('{{cart_item.mount.color}}');
+				{% endif %}
+				{% if cart_item.mount_size != "None" %}
+					set_mount_size('{{cart_item.mount_size}}', '0','0','0','0');
+					$("#mount_size").val('{{cart_item.mount_size}}');
+				{% endif %}
+				{% if cart_item.acrylic_id != "None" %}
+					set_acrylic('{{cart_item.acrylic_id}}');
+				{% endif %}
+				{% if cart_item.board_id != "None" %}
+					set_board('{{cart_item.board_id}}');
+				{% endif %}
+				{% if cart_item.stretch_id != "None" %}
+					set_stretch('{{cart_item.stretch_id}}');
+				{% endif %}
+				{% if cart_item.image_width != "None" %}					
+					$("#size-slider").slider( "value", {{cart_item.image_width}} );
+				{% endif %}
+				calc_total_price();
+				//getFramedImg ('{{cart_item.product_id}}', moulding_id, mount_color, mount_size);
+			{% endif %}	
+				
+			
 		});
 		
 		function startMagnify(){

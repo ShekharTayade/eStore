@@ -39,34 +39,35 @@ def get_FramedImage(request):
 	moulding = Moulding_image.objects.filter(moulding_id = m_id, image_type = "APPLY").values(
 				'url', 'moulding__width_inches', 'border_slice').first()
 	
-	m_width_inch = float(moulding['moulding__width_inches'])
-
-
+	if moulding:
 	
-	# Image width displayed in browser in inches
-	disp_inch = 450//96
-	
-	ratio = disp_inch / user_width
-	
-	border = int(m_width_inch * ratio * 96)
-	
-	border = int(m_width_inch * 450 / user_width)
-	
-	
-
-	m_size = int(mount_size * 96 * ratio)
-	if m_size > 0 and mount_color != '':
-
-		img_with_mount = addMount(img_source, mount_color, m_size, m_size, m_size, m_size)
+		m_width_inch = float(moulding['moulding__width_inches'])
 		
-		framed_img = applyBorder( request, img_with_mount, moulding['url'], border, border, border, border,
-						float(moulding['border_slice']), float(moulding['border_slice']), 
-						float(moulding['border_slice']), float(moulding['border_slice']) )
-	else:
-		framed_img = applyBorder( request, img_source, moulding['url'], border, border, border, border,
-						float(moulding['border_slice']), float(moulding['border_slice']), 
-						float(moulding['border_slice']), float(moulding['border_slice']) )
+		# Image width displayed in browser in inches
+		disp_inch = 450//96
+		
+		ratio = disp_inch / user_width
+		
+		border = int(m_width_inch * ratio * 96)
+		
+		border = int(m_width_inch * 450 / user_width)
+		
+		m_size = int(mount_size * 96 * ratio)
+		if m_size > 0 and mount_color != ''and mount_color != 'None':
 
+			img_with_mount = addMount(img_source, mount_color, m_size, m_size, m_size, m_size)
+			
+			framed_img = applyBorder( request, img_with_mount, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+		else:
+			framed_img = applyBorder( request, img_source, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+	else :
+		# No moulding, returing the image as it is.
+		framed_img = Image.new("RGB", (img_source.width, img_source.height), 0)
+		framed_img.paste(img_source, (0,0))		
 	'''
 	response = HttpResponse(content_type="image/png")
 	framed_img.save(response, "PNG")

@@ -99,7 +99,26 @@ def product_details(request, prod_id):
 	# get the images with all mouldings
 	img_with_all_mouldings = get_ImagesWithAllFrames(request, prod_id, 16)
 	
-	
+	# Check if request contains any components, if it does send the those to the front end
+	cart_item_id = request.GET.get('cart_item_id', '')
+	'''
+		moulding_id = request.GET.get('moulding_id', '')
+		moulding_size = request.GET.get('moulding_size', '')
+		print_medium_size = request.GET.get('print_medium_size', '')
+		mount_id = request.GET.get('mount_id', '')
+		mount_size = request.GET.get('mount_size', '')
+		board_id = request.GET.get('board_id', '')
+		board_size = request.GET.get('board_size', '')
+		acrylic_id = request.GET.get('acrylic_id', '')
+		acrylic_size = request.GET.get('acrylic_size', '')
+		stretch_id = request.GET.get('stretch_id', '')
+		stretch_size = request.GET.get('stretch_size', '')
+		image_width = request.GET.get('image_width', '')
+		image_height = request.GET.get('image_height', '')
+	'''
+	cart_item = {}
+	if cart_item_id != '':
+		cart_item = Cart_item.objects.filter(cart_item_id = cart_item_id).first()
 	
 	return render(request, "eStore/product_detail.html", {'prod_detail':prod_detail, 'main_img':main_img,
 		'prod_images': prod_images, 'prod_variants':prod_variants, 'prod_categories':prod_categories, 
@@ -107,7 +126,8 @@ def product_details(request, prod_id):
 		'maxheight':maxheight, 'orientation':orientation, 'imagetype': imagetype, 'printmedium':printmedium,
 		'mouldings_appply':paper_mouldings_apply, 'mouldings_show':paper_mouldings_show, 'mounts':mounts,
 		'per_sqinch_paper':per_sqinch_paper, 'per_sqinch_canvas':per_sqinch_canvas, 'acrylics':acrylics,
-		'boards':boards, 'img_with_all_mouldings':img_with_all_mouldings, 'stretches':stretches} )	
+		'boards':boards, 'img_with_all_mouldings':img_with_all_mouldings, 'stretches':stretches,
+		'cart_item':cart_item} )	
 	
 
 def show_mouldings(request):
@@ -537,14 +557,16 @@ def get_item_price (request):
 		print( "Total Price: " + str(item_price))
 
 	
-	item_price_withoutdisc = item_price
+	item_price_withoutdisc = round(item_price)
+	
 	disc_applied = False
 	promo = get_product_promotion(prod_id)
 	print(promo)
 		
-	discounted_amt = 0
+	disc_amt = 0
+	cash_disc = 0
 	if promo:
-		cash_disc = promo['cash_disc']
+		cash_disc = round(promo['cash_disc'])
 		percent_disc = promo['percent_disc']	
 		promotion_id = promo['promotion_id']
 	else:
@@ -555,18 +577,20 @@ def get_item_price (request):
 	if cash_disc > 0:
 		item_price = item_price - cash_disc
 		disc_applied = True
-		discounted_amt = cash_disc
+		disc_amt = round(cash_disc)
 	elif percent_disc > 0:
-		item_price = item_price - ( item_price * percent_disc / 100 )
+		disc_amt = round(item_price * percent_disc / 100)
+		item_price = item_price - disc_amt
 		disc_applied = True
-		discounted_amt = item_price * percent_disc / 100
 		
 	item_price = round(item_price)
 
+	print( "Disc Amt: " + str(disc_amt))
+	print( "Item Price: " + str(item_price))
 
 	return JsonResponse({"msg":msg, "item_price" : item_price, 'cash_disc':cash_disc,
-				'percent_disc':percent_disc, 'item_price_withoutdisc':item_price_withoutdisc,
-				'discounted_amt':discounted_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
+				'percent_disc':percent_disc, 'item_unit_price':item_price_withoutdisc,
+				'disc_amt':disc_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
 	
 
 @csrf_exempt	
@@ -698,9 +722,7 @@ def get_item_price_by_cart_item (cart_item_id):
 				'percent_disc':percent_disc, 'item_price_withoutdisc':item_price_withoutdisc,
 				'discounted_amt':discounted_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
 
-
-
-	
+			
 def get_product_promotion(prod_id):
 
 	# Product promotions #	

@@ -91,7 +91,7 @@
 						<input hidden name = "tax" value = "{{tax}}">
 						<input hidden name = "disc_amt" value = "{{disc_amt}}">
 						<input hidden name = "order_total" value = "{{order_total}}">
-						<input hidden name = "shipping_cost" value = "$('#s-h').html();">
+						<input hidden id = "shipping_cost" name = "shipping_cost" value = "0">
 						<h1>Checkout - Shipping</h1>
 
 						<div class="nav flex-column flex-md-row nav-pills text-center">
@@ -241,6 +241,7 @@
 			new_total = {{order_total}} + ship_handling;
 			
 			$("#s-h").html(ship_handling);
+			$("#shipping_cost").val(ship_handling);
 			
 			$("#ord-total").html(new_total);
 		}

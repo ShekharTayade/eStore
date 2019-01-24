@@ -157,9 +157,56 @@
 		
 		}
 		
-		function applyCoupan(v_code) {
-			console.log(v_code);
-			
+		function applyVoucher(cart_id, v_code, cart_total) {
+			// Let's update the cart view
+			$.ajax({
+				url: '{% url "apply_voucher" %}', 
+				data: {'cart_id':cart_id, 'voucher_code':v_code, 'cart_total':cart_total},
+				dataType: 'text', 
+				type: 'POST',
+				success: function (data) {
+					response = JSON.parse(data); 
+					console.log(response.status);
+					
+					switch(response.status) {
+					  case "SUCCESS":
+							$("#voucher-msg").html("Congratulations! " + response.disc_amount + " discount applied.");
+							
+							//Existing disc from the product promotions
+							disc_amt = parseFloat($("#disc_amt").html());
+							if ( isNaN(disc_amt) ) {
+								disc_amt = 0;
+							}
+							cart_total = parseFloat($("#cart_total").html());
+							
+							// Add the disc through voucher
+							disc_amt = disc_amt + parseFloat( response.disc_amount );
+							cart_total = cart_total - parseFloat( response.disc_amount );
+							
+							$("#disc_amt").html(disc_amt);
+							$("#cart_total").html(cart_total);
+							$("#disc_amt_nv").val(disc_amt);
+							$("#cart_total_nv").val(cart_total);
+							break;
+					  case "INVALID-CODE":
+							$("#voucher-msg").html("Entered Code is invalid");
+							break;
+					  case "USER-MISMATCH":
+							$("#voucher-msg").html("Entered Code is not valid for you.");
+							break;
+					  case "USED":
+							$("#voucher-msg").html("You have already used this code.");
+							break;
+					  default:
+							$("#voucher-msg").html("Sorry! We have encounter an error in applying this code.");
+					}					
+					
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText + " Apologies for the inconvenience!! Please let us know the details and we will be happy to help sort it out."); 
+					return;
+				}
+			});							
 			
 		
 		}

@@ -13,7 +13,7 @@ import json
 
 from eStore.models import Ecom_site, Main_slider, New_arrival, Promotion, Menu, Product_category
 from eStore.models import New_arrival_images, Promotion_images, Product
-from eStore.models import Cart, Cart_item, Tax, Order, Order_items
+from eStore.models import Cart, Cart_item, Tax, Order, Order_items, Voucher_user, Voucher
 from eStore.models import Menu
 from .frame_views import *
 from .image_views import *
@@ -26,47 +26,59 @@ ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
 @csrf_protect
 @csrf_exempt
 def add_to_cart(request):
-	prod_id = request.GET.get('prod_id', '')
-	qty = int(request.GET.get('qty', '0'))
-	moulding_id = request.GET.get('moulding_id', '')
-	if moulding_id == '0':
+	prod_id = request.POST.get('prod_id', '')
+	qty = int(request.POST.get('qty', '0'))
+	moulding_id = request.POST.get('moulding_id', '')
+	if moulding_id == '0' or moulding_id == 'None':
 		moulding_id = None
 
-	moulding_size = Decimal(request.GET.get('moulding_size', '0'))
-	print_medium_id = request.GET.get('print_medium_id', '')
-	print_medium_size = Decimal(request.GET.get('print_medium_size', '0'))
-	mount_id = request.GET.get('mount_id', '')
-	if mount_id == '0':
+	moulding_size = Decimal(request.POST.get('moulding_size', '0'))
+	print_medium_id = request.POST.get('print_medium_id', '')
+	print_medium_size = Decimal(request.POST.get('print_medium_size', '0'))
+	mount_id = request.POST.get('mount_id', '0')
+	if mount_id == '0' or mount_id == 'None':
 		mount_id = None
-	mount_size = Decimal(request.GET.get('mount_size', '0'))
-	mount_w_left = Decimal(request.GET.get('mount_w_left', '0'))
-	mount_w_right = Decimal(request.GET.get('mount_w_right', '0'))
-	mount_w_left = Decimal(request.GET.get('mount_w_top', '0'))
-	mount_w_left = Decimal(request.GET.get('mount_w_bottom', '0'))
-	acrylic_id = request.GET.get('acrylic_id', '')
-	if acrylic_id == '0':
+	mount_size = Decimal(request.POST.get('mount_size', '0'))
+	mount_w_left = Decimal(request.POST.get('mount_w_left', '0'))
+	mount_w_right = Decimal(request.POST.get('mount_w_right', '0'))
+	mount_w_left = Decimal(request.POST.get('mount_w_top', '0'))
+	mount_w_left = Decimal(request.POST.get('mount_w_bottom', '0'))
+	acrylic_id = request.POST.get('acrylic_id', '0')
+	if acrylic_id == '0' or acrylic_id == 'None':
 		acrylic_id = None
-	acrylic_size = Decimal(request.GET.get('acrylic_size', '0'))
-	board_id = request.GET.get('board_id', '')
-	if board_id == '0':
+	acrylic_size = Decimal(request.POST.get('acrylic_size', '0'))
+	board_id = request.POST.get('board_id', '')
+	if board_id == '0' or board_id == 'None':
 		board_id = None
-	board_size = Decimal(request.GET.get('board_size', '0'))
-	stretch_id = Decimal(request.GET.get('stretch_id', ''))
-	if stretch_id == '0':
+	board_size = Decimal(request.POST.get('board_size', '0'))
+	stretch_id = request.POST.get('stretch_id', '0')
+	if stretch_id == '0' or stretch_id == 'None':
 		stretch_id = None
-	total_price = Decimal(request.GET.get('total_price', '0'))
-	product_tag_id = request.GET.get('product_tag_id', '')
-	if product_tag_id == '':
-		product_tag_id = None
 
-	userid = None
-	image_width = Decimal(request.GET.get('image_width', '0'))
-	image_height = Decimal(request.GET.get('image_height', '0'))
-
-	discount = request.GET.get('discount', '')
-
-	promo_str = request.GET.get('promotion_id', '0')
+	str_item_unit_price = request.POST.get('item_unit_price', '0')
+	if str_item_unit_price == '':
+		str_item_unit_price = '0'
+	item_unit_price = Decimal(str_item_unit_price)
 	
+	str_total_price = request.POST.get('total_price', '0')
+	if str_total_price == '':
+		str_total_price = 0
+	total_price = Decimal(str_total_price)
+	
+	str_disc_amt = request.POST.get('disc_amt', '0')
+	if str_disc_amt == '':
+		str_disc_amt = 0
+	disc_amt = Decimal(str_disc_amt)
+
+	
+	userid = None
+	image_width = Decimal(request.POST.get('image_width', '0'))
+	image_height = Decimal(request.POST.get('image_height', '0'))
+
+	discount = request.POST.get('discount', '')
+
+	promo_str = request.POST.get('promotion_id', '0')
+
 	if promo_str == '':
 		promo_str = '0'
 	promo_id = int(promo_str)
@@ -79,13 +91,18 @@ def add_to_cart(request):
 		return( JsonResponse({'msg':msg, 'cart_qty':qty}, safe=False) )
 
 		
+	# TAX to be plugged in here, which will also derive sub_total
+	item_tax = 0
+	item_sub_total = 0
+	#############################################################
+		
 	# Get any discount on the product
 	promo = get_product_promotion(prod_id)
 	#promo_id = promo['promotion_id'] ### To be taken from the input to this function, so the promo code flows here
 	cash_disc = promo['cash_disc']
 	percent_disc = promo['percent_disc']
 	
-	# get Promotion object
+	# get Promotion object for adding it in the cart item
 	promotion = {}
 	if promo != 0:
 		promotion = Promotion.objects.filter(promotion_id = promo_id).first()
@@ -151,15 +168,6 @@ def add_to_cart(request):
 		if cart_prods:
 			
 			prod_exits_in_cart = True
-			cartitem_id = cart_prods.cartitem_id
-			item_qty = cart_prods.quantity
-			item_price = cart_prods.item_total
-			
-			# Apply Discount, if any
-			if cash_disc > 0:
-				item_price = item_price - cash_disc
-			elif percent_disc > 0:
-				item_price = item_price - (item_price * percent_disc / 100)
 	
 		try :
 			
@@ -168,9 +176,14 @@ def add_to_cart(request):
 				cart_id = usercart.cart_id,
 				store = ecom,
 				user = userid,
+				cart_sub_total = usercart.cart_sub_total + item_sub_total,
+				cart_disc_amt = usercart.cart_disc_amt + disc_amt,
+				cart_tax  = usercart.cart_tax + item_tax,
 				cart_total = Decimal(usercart.cart_total) + (total_price),
 				session_id = sessionid,
 				quantity =  usercart.quantity + qty,
+				voucher_id = usercart.voucher_id,
+				voucher_disc_amount = usercart.voucher_disc_amount,
 				updated_date = today,
 				cart_status = usercart.cart_status
 			)
@@ -180,12 +193,16 @@ def add_to_cart(request):
 			''' If the product with same moulding, print_medium etc. already exists in the cart items, then update it, else insert new item '''
 			if prod_exits_in_cart:
 				usercartitems = Cart_item(
-					cart_item_id = cartitem_id,
+					cart_item_id = cart_prods.cartitem_id,
 					cart = usercart,
-					product_id = prod_id,
-					promotion = promotion,
-					quantity = item_qty + qty,
-					item_total = item_price + total_price,
+					product_id = cart_prods.product_id,
+					promotion = cart_prods.promotion,
+					quantity = cart_prods.quanityt + qty,
+					item_unit_price = item_unit_price,
+					item_sub_total = cart_prods.item_sub_total + item_sub_total,
+					item_disc_amt = cart_prods.disc_amt + disc_amt,
+					item_tax  = cart_prods.item_tax + item_tax,
+					item_total = cart_prods.item_total + total_price,
 					print_medium_id = print_medium_id,
 					print_medium_size = print_medium_size,
 					moulding_id = moulding_id,
@@ -202,11 +219,16 @@ def add_to_cart(request):
 				)
 				usercartitems.save()
 			else:
+				# add new product in the cart
 				usercartitems = Cart_item(
 					cart = usercart,
 					product_id = prod_id,
 					promotion = promotion,
 					quantity = qty,
+					item_unit_price = item_unit_price,
+					item_sub_total = item_sub_total,
+					item_tax  = item_tax,
+					item_disc_amt = disc_amt,
 					item_total = total_price,
 					print_medium_id = print_medium_id,
 					print_medium_size = print_medium_size,
@@ -241,11 +263,14 @@ def add_to_cart(request):
 			newusercart = Cart(
 				store = ecom,
 				user = userid,
-				cart_total = total_price,
 				session_id = sessionid,
 				quantity =  qty,
+				cart_sub_total = item_sub_total,
+				cart_disc_amt = disc_amt,
+				cart_tax  = item_tax,
+				cart_total = total_price,
 				updated_date = today,
-				cart_status = 'AA'
+				cart_status = 'AC'		
 			)
 
 			newusercart.save()
@@ -255,6 +280,10 @@ def add_to_cart(request):
 				product = prod,
 				promotion = promotion,
 				quantity = qty,
+				item_unit_price = item_unit_price,
+				item_sub_total = item_sub_total,
+				item_tax  = item_tax,
+				item_disc_amt = disc_amt,
 				item_total = total_price,
 				print_medium_id = print_medium_id,
 				print_medium_size = print_medium_size,
@@ -307,7 +336,8 @@ def show_cart(request):
 			'cart_item_id', 'product_id', 'quantity', 'item_total', 'moulding_id',
 			'moulding__name', 'moulding__width_inches', 'print_medium_id', 'mount_id', 'mount__name',
 			'acrylic_id', 'mount_size', 'product__name', 'image_width', 'image_height',
-			'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color'
+			'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color',
+			'item_unit_price', 'item_sub_total', 'item_disc_amt', 'item_tax', 'item_total'
 			)
 			
 			
@@ -319,61 +349,7 @@ def show_cart(request):
 	image_tax_rate = taxes['image_tax_rate']
 	oth_tax_rate = taxes ['oth_tax_rate']
 
-	
-	image_tax = 0
-	#moulding_tax = 0
-	#mount_tax = 0
-	#acrylic_tax = 0
-	#board_tax = 0
-	#stretch_tax = 0
-	total_tax = 0
-	sub_total = 0
-	disc_amt = 0
-	
-	for c in usercartitems:
 
-	
-		# Get image price on paper and canvas
-		per_sqinch_price = get_per_sqinch_price(c['product_id'])
-		per_sqinch_paper = per_sqinch_price['per_sqin_paper']
-		per_sqinch_canvas = per_sqinch_price['per_sqin_canvas']
-
-		# Get price for the product in cart
-		item_total_price = get_item_price_by_cart_item(c['cart_item_id'])
-		
-		# image tax
-		#if c['print_medium_id'] == 'PAPER':
-		#	image_price = c['image_width'] * c['image_height'] * per_sqinch_paper
-		#else :
-		#	image_price = c['image_width'] * c['image_height'] * per_sqinch_canvas
-		
-		net_image_price = item_total_price['image_price'] / (1 + (image_tax_rate/100))
-		image_tax = item_total_price['image_price'] - net_image_price
-		total_tax = total_tax + image_tax
-		sub_total = sub_total + net_image_price
-		
-		# All other prices - All other items carry equal tax rate (it can be separated later on, if required
-		if 	oth_tax_rate != 0:
-			oth_prices = c['item_total'] - item_total_price['image_price']
-			net_oth_price = oth_prices / (1 + oth_tax_rate/100)
-			oth_tax = oth_prices - net_oth_price
-			total_tax = total_tax + oth_tax
-			sub_total = sub_total + net_oth_price
-
-
-		# Get any discount on the product
-		promo = get_product_promotion(c['product_id'])
-		if promo :
-			cash_disc = promo['cash_disc']
-			percent_disc = promo['percent_disc']
-			# Apply Discount, if any
-			d_amt = 0
-			if cash_disc > 0:
-				d_amt = cash_disc
-			elif percent_disc > 0:
-				d_amt = (c['item_total'] * percent_disc / 100)
-							
-			disc_amt = disc_amt + d_amt
 	
 	if request.is_ajax():
 
@@ -383,7 +359,7 @@ def show_cart(request):
 	
 	
 	return render(request, template, {'usercart':usercart, 
-		'usercartitems': usercartitems, 'sub_total': sub_total, 'total_tax':total_tax, 'disc_amt':disc_amt})
+		'usercartitems': usercartitems})
 
 @csrf_exempt
 def update_cart_item(request):
@@ -405,7 +381,6 @@ def update_cart_item(request):
 	
 	# Get price for this cart item (by each pricing component )
 	total_price = 0
-
 	
 	updated_qty = int(json_data['updated_qty'])
 	##############################################
@@ -413,6 +388,12 @@ def update_cart_item(request):
 	##############################################
 	image_price = 0
 	item_price = 0
+
+	c_item = get_item_price_by_cart_item(json_data['cart_item_id'])
+	
+	if c_item:
+		item_price = round(c_item['item_price'])
+	'''
 	# Get image price on paper and canvas
 	per_sqinch_price = get_per_sqinch_price(cart_item.product_id)
 	per_sqinch_paper = per_sqinch_price['per_sqin_paper']
@@ -484,12 +465,36 @@ def update_cart_item(request):
 		print( "Stretch Price: " + str(stretch_price))
 
 		print( "Total Price: " + str(item_price))
+		
 
 	item_price = round(item_price)			
 	#########################################
 	## END: Get Item Price
 	#########################################
-	item_total = item_price*updated_qty
+	'''
+
+	item_total = item_price * updated_qty
+	
+
+	#######################################
+	## Apply the voucher discount, if any
+	#######################################
+	#if cart.voucher:
+	#	voucher_user = Voucher_user.objects.filter(voucher = cart.voucher, effective_from__lte = today, 
+	#		effective_to__gte = today).first()
+
+		
+
+		#request.session['cart_id'] = cart.cart_id
+		#request.session['voucher_code'] = cart.voucher.voucher_code
+		#request.session['cart_total'] = cart.cart_total
+		#voucher = apply_voucher(request)	
+		#json_data = json.loads(voucher.content)
+		#if json_data['status'] == "SUCCESS":
+		#	print( "Process Voucher.....................")
+		
+		
+	
 	
 	# Cart Price
 	cart_total = cart.cart_total - cart_item.item_total + item_total
@@ -521,33 +526,37 @@ def update_cart_item(request):
 			cart_total = cart_total ,
 			session_id = cart.session_id,
 			quantity =  cart.quantity - cart_item.quantity + updated_qty,
+			voucher_id = cart.voucher_id,
+			voucher_disc_amount = cart.voucher_disc_amount,
 			updated_date = today,
 			cart_status = cart.cart_status
 
 		)
-
 		newusercart.save()
 			
 		usercartitems = Cart_item(
 			cart_item_id = cart_item.cart_item_id,
-			cart = cart_item.cart,
+			cart_id = cart_item.cart_id,
 			product = cart_item.product,
+			promotion = cart_item.promotion,
 			quantity = updated_qty,
 			item_total = item_total,
-			print_medium_id = cart_item.print_medium_id,
-			print_medium_size = cart_item.print_medium_size,
 			moulding_id = cart_item.moulding_id,
 			moulding_size = cart_item.moulding_size,
+			print_medium_id = cart_item.print_medium_id,
+			print_medium_size = cart_item.print_medium_size,
 			mount_id = cart_item.mount_id,
 			mount_size = cart_item.mount_size,
-			acrylic_id = cart_item.acrylic_id,
-			acrylic_size = cart_item.acrylic_size,
 			board_id = cart_item.board_id,
 			board_size = cart_item.board_size,
+			acrylic_id = cart_item.acrylic_id,
+			acrylic_size = cart_item.acrylic_size,
+			stretch_id = cart_item.stretch_id,
+			stretch_size = cart_item.stretch_size,
 			image_width = cart_item.image_width,
 			image_height = cart_item.image_height,
 			updated_date = today
-		)
+			)
 		usercartitems.save()
 
 
@@ -566,9 +575,6 @@ def update_cart_item(request):
 @csrf_exempt	
 def delete_cart_item(request):
 
-	import pdb
-	pdb.set_trace()
-	
 	cart_item_id = request.POST.get('cart_item_id','')
 	sub_total = request.POST.get('sub_total','')
 	cart_total = request.POST.get('cart_total','')
@@ -754,4 +760,88 @@ def sync_cart_session_user(request, sessionid):
 			return JsonResponse({"status":"NOUSER"})
 	
 	return JsonResponse({"status":"NOCART"})
+	
+	
+@csrf_exempt
+def apply_voucher(request):
 		
+	cart_id = int(request.POST.get('cart_id', '0'))
+	voucher_code = request.POST.get('voucher_code', '')
+	cart_total = Decimal(request.POST.get('cart_total', '0'))
+
+	if voucher_code == '':
+		return JsonResponse({"status":"INVALID-CODE"})
+	
+	
+	voucher = Voucher.objects.filter(voucher_code = voucher_code, effective_from__lte = today, 
+			effective_to__gte = today, store_id = settings.STORE_ID).first()
+			
+	if not voucher :
+		return JsonResponse({"status":"INVALID-CODE"})
+
+	voucher_user = Voucher_user.objects.filter(voucher = voucher, effective_from__lte = today, 
+			effective_to__gte = today).first()
+
+	if not voucher_user :
+		return JsonResponse({"status":"INVALID-CODE"})
+
+	if voucher_user.used_date != None :
+		return JsonResponse({"status":"USED"})
+		
+		
+	# get logged in user
+	user = User.objects.get(username = request.user)
+	
+	if voucher_user.user != user:
+		return JsonResponse({"status":"USER-MISMATCH", 'voucher_disc_amt':voucher_disc_amt})
+	
+	disc_type = voucher.discount_type
+	disc_amount = 0
+
+	status = "SUCCESS"
+	
+	if disc_type == "PERCENTAGE":
+		disc_amount = cart_total * voucher.discount_value/100
+		cart_total = cart_total - ( cart_total * voucher.discount_value/100 )
+	elif disc_type == "CASH":
+		disc_amount = voucher.discount_value
+		cart_total = cart_total - voucher.discount_value
+
+	status = "SUCCESS"
+
+	# Update the cart with voucher
+	cart = Cart.objects.filter(cart_id = cart_id).first()
+	if cart :
+		
+		try:
+			c = Cart (
+				cart_id = cart_id,
+				store = cart.store,
+				session_id = cart.session_id,
+				user = cart.user,
+				voucher_id = voucher.voucher_id,
+				voucher_disc_amount = disc_amount,
+				quantity = cart.quantity,
+				cart_total = cart_total,
+				updated_date =  today,
+				cart_status = cart.cart_status
+			)
+			c.save()
+			
+			v = Voucher_user (
+				id = voucher_user.id,
+				voucher = voucher_user.voucher,
+				user = voucher_user.user,
+				effective_from = voucher_user.effective_from,
+				effective_to = voucher_user.effective_to,
+				used_date = today
+			)
+			v.save()
+			
+		except Error as e:
+			status = 'INT-ERR'
+
+	return JsonResponse({"status":status, 'disc_amount': disc_amount, 'cart_total':cart_total})
+	
+	
+	
