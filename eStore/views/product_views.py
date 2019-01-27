@@ -101,6 +101,7 @@ def product_details(request, prod_id):
 	
 	# Check if request contains any components, if it does send the those to the front end
 	cart_item_id = request.GET.get('cart_item_id', '')
+	
 	'''
 		moulding_id = request.GET.get('moulding_id', '')
 		moulding_size = request.GET.get('moulding_size', '')
@@ -230,7 +231,7 @@ def category_products(request, cat_id):
 
 	prod_filters = ['ORIENTATION', 'ARTIST', 'IMAGE-TYPE']
 	prod_filter_values = Product_attribute.objects.filter(product__in = products).values(
-	'name', 'value').distinct()
+	'name', 'value').distinct().order_by('value')
 
 
 	if show == None or show == '50':
@@ -419,7 +420,7 @@ def get_item_price (request):
 	prod_id = 0
 
 	msg = ""
-	
+
 	# Get data from the request.
 	json_data = json.loads(request.body.decode("utf-8"))
 
@@ -696,7 +697,7 @@ def get_item_price_by_cart_item (cart_item_id):
 	promo = get_product_promotion(cart_item.product_id)
 	print(promo)
 		
-	discounted_amt = 0
+	disc_amt = 0
 	if promo:
 		cash_disc = promo['cash_disc']
 		percent_disc = promo['percent_disc']	
@@ -709,18 +710,18 @@ def get_item_price_by_cart_item (cart_item_id):
 	if cash_disc > 0:
 		item_price = item_price - cash_disc
 		disc_applied = True
-		discounted_amt = cash_disc
+		disc_amt = cash_disc
 	elif percent_disc > 0:
-		item_price = item_price - ( item_price * percent_disc / 100 )
+		disc_amt = item_price * percent_disc / 100
+		item_price = item_price - ( disc_amt )
 		disc_applied = True
-		discounted_amt = item_price * percent_disc / 100
 		
 	item_price = round(item_price)
 
 
 	return ({"msg":msg, "item_price" : item_price, 'image_price':image_price, 'cash_disc':cash_disc,
-				'percent_disc':percent_disc, 'item_price_withoutdisc':item_price_withoutdisc,
-				'discounted_amt':discounted_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
+				'percent_disc':percent_disc, 'item_unit_price':item_price_withoutdisc,
+				'disc_amt':disc_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
 
 			
 def get_product_promotion(prod_id):

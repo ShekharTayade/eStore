@@ -37,7 +37,7 @@
 								<strong>Shipping & handling</strong>
 							</div>
 							<div class = "col-sm-12">		
-								<span class = "ord-row">TBD</span>
+								<span class = "ord-row">{{shipping_cost|floatformat}}</span>
 							</div>
 						</div>
 						<div class = "col-sm-2">
@@ -129,21 +129,18 @@
 												type="text" class="form-control"
 												required
 												value = "{{shipping_addr.full_name}}">
-										</div>	
-										
+										</div>
 									</div>
 									<div class="row" style = "padding:15px;">
 										<div class="col-md-6">
-											<div class="form-group">
-												<label for="shipping_phone_number">Mobile</label>
-												<input id="shipping_phone_number" name="shipping_phone_number" 
-													type="text" class="form-control"  
-													placeholder = "10-digit mobile number without prefix"
-													pattern="[6-9]\d{9}"
-													maxlength = "10"
-													required
-													value = "{{shipping_addr.phone_number}}">
-											</div>
+											<label for="shipping_phone_number">Mobile</label>
+											<input id="shipping_phone_number" name="shipping_phone_number" 
+												type="text" class="form-control"  
+												placeholder = "10-digit mobile number without prefix"
+												pattern="[6-9]\d{9}"
+												maxlength = "10"
+												required
+												value = "{{shipping_addr.phone_number}}">
 										</div>
 										<div class="col-md-6">
 											<div class="form-group">

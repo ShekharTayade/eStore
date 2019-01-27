@@ -36,7 +36,26 @@ class Ecom_site(models.Model):
 	show_frame_my_art_section = models.BooleanField(null=False, default=False)
 	frame_my_art_header = models.CharField(max_length = 50 , blank=True, default='')
 	number_of_frame_my_art_slides = models.IntegerField(null=True, blank=True)
+	#email_support_enabled = models.BooleanField(null=False, default=False)
+	#support_email = models.EmailField(blank=True, default='')
 
+	
+class Contact_us(models.Model):
+    first_name = models.CharField(max_length=150, blank=False, null =False)
+    last_name = models.CharField(max_length=150, blank=False, null =False)
+    email_id = models.EmailField(blank=False, null=False)
+    phone_number = models.CharField(max_length=30, blank=True, default='')
+    subject = models.CharField(max_length=200, blank=False, null =False)
+    message = models.CharField(max_length=4000, blank=False, null =False)
+    msg_datetime = models.DateTimeField(null=True, auto_now_add=True, editable=False)
+    response = models.CharField(max_length=4000, blank=True, default='',editable=False)
+    resp_datetime = models.DateTimeField(null=True, editable=False)
+    reponded_by = models.CharField(max_length=30, blank=True, default='', editable=False)
+    
+    def __str__(self):
+        return self.name
+	
+	
 # Model - voucher
 # This model stores vouchers that the Store grants.	
 class Voucher(models.Model):
@@ -661,7 +680,7 @@ class Order (models.Model):
 	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
 	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 	voucher = models.ForeignKey(Voucher, models.CASCADE, null=True)
-	vouncher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	voucher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	quantity = models.IntegerField(null=True)
 	sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	order_discount_amt = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
@@ -787,20 +806,17 @@ class Profile_group (models.Model):
 	discount_percentage = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	effective_from = models.DateField(blank=True, null=True)
 	effective_to = models.DateField(blank=True, null=True)	
+
 	
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-	location = models.CharField(max_length=30, blank=True)
+	full_name = models.CharField(max_length=500, blank=False)
 	company =  models.CharField(max_length=30, blank=True)
-	profile_group = models.ForeignKey(Profile_group, models.CASCADE, null=False)
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-	if created:
-		Profile.objects.create(user=instance)	
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-	instance.profile.save()
-	
-	
+	profile_group = models.ForeignKey(Profile_group, models.CASCADE, null=True)
+	address_1 = models.CharField(max_length=600, blank=True, null='')
+	address_2 = models.CharField(max_length=600, blank=True, default='')
+	city = models.CharField(max_length=600, blank=True, default='')
+	state = models.ForeignKey(State, on_delete = models.PROTECT, null=True)
+	pin_code = models.ForeignKey(Pin_code, on_delete = models.PROTECT, null=True)
+	country = models.ForeignKey(Country, on_delete = models.PROTECT, null=False, default= "IND")
+	phone_number = models.CharField(max_length=30, blank=True, default='')

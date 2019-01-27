@@ -41,7 +41,7 @@ def menubar(request):
 	# Level 1
 	level1_menuitems = Product_category.objects.annotate(Count(
 			'product_product_category')).filter(parent_id__isnull = True,
-			product_product_category__count__gt = 10).order_by('-product_product_category__count')
+			product_product_category__count__gt = 100).order_by('-product_product_category__count')
 
 	# Level 2
 	level2_menuitems = Product_category.objects.filter(parent_id__in = level1_menuitems)

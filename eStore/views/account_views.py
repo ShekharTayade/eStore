@@ -11,6 +11,7 @@ from django.urls import resolve
 from django.contrib import messages
    
 from .cart_views import *
+from eStore.forms import registerForm, profileForm
    
 def eStorelogin(request):
 
@@ -49,3 +50,19 @@ def eStorelogin(request):
 		
 		messages.add_message(request, messages.ERROR, 'Unauthozied login tried.')		
 		return render(request, 'eStore/estore_base.html')
+
+	
+def register(request):
+
+	if request.method == 'POST':
+		next = request.POST['curr_pg']
+		form = registerForm(request.POST)
+		if form.is_valid():
+			user = form.save()
+			auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+			# After successful sign up redirect to cuurent page
+			return redirect('index')
+	else:
+		form = registerForm()
+	return render(request, "eStore/register.html", {'form':form} )

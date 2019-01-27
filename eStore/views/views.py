@@ -3,27 +3,40 @@ from datetime import datetime
 import datetime
 from django.db import IntegrityError, DatabaseError, Error
 
-#from eStore.models import Ecom_site, Main_slider, New_arrival, Promotion, Menu, Product_category
+from eStore.models import Ecom_site
+from eStore.forms import contactUsForm
+
 #from eStore.models import Product_collection
 #from eStore.models import New_arrival_images, Promotion_images, Product, Product_image, Cart
 from django.http import HttpResponse
 from django.conf import settings
 
 
+today = datetime.date.today()
+ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
+
 def index(request):
 
 
 	return render(request, "eStore/estore_base.html",{})
 
-	
-def register(request):
-	
-	return render(request, "eStore/register.html")
 
 def contact_us(request):
 
-	return render(request, "eStore/contact_us.html")
+	if request.method == 'POST':
+		form = contactUsForm(request.POST)
+		if form.is_valid():
+			contact = form.save()
+			return redirect('index')  
+	else:
+		form = contactUsForm()
+		
+	return render(request, "eStore/contact_us.html", {'ecom_site':ecom, 'form':form})
 
+def contact_msg(request):	
+		return render(request, "eStore/contactUs_confirm.html", {})
+
+	
 def about_us(request):
 
 	return render(request, "eStore/about_us.html")

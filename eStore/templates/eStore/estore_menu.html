@@ -48,7 +48,7 @@
 								{% for level1 in level1_menuitems %}
 								
 								<div class="col-md-6 col-lg-3">
-									<h5><a href="{% url 'category_products' level1.category_id %}" class="nav-link">{{level1.name|title}}<span class = "menu-badge">{{level1.product_product_category__count}}</span></a></h5>
+									<h5><a href="{% url 'category_products' level1.category_id %}" class="nav-link">{{level1.name|title}} <span class = "menu-badge">{{level1.product_product_category__count}}</span></a></h5>
 									<ul class="list-unstyled mb-3">
 									{% for level2 in level2_menuitems %}
 									{% if level2.parent_id == level1.category_id %}

@@ -36,7 +36,7 @@
 								<strong>Shipping & handling</strong>
 							</div>
 							<div class = "col-sm-12">		
-								<span id ="s-h" class = "ord-row">TBD</span>
+								<span id ="s-h" class = "ord-row">{{shipping_cost|floatformat}}</span>
 							</div>
 						</div>
 						<div class = "col-sm-2">
@@ -90,8 +90,9 @@
 						<input hidden name = "sub_total" value = "{{sub_total}}">
 						<input hidden name = "tax" value = "{{tax}}">
 						<input hidden name = "disc_amt" value = "{{disc_amt}}">
-						<input hidden name = "order_total" value = "{{order_total}}">
-						<input hidden id = "shipping_cost" name = "shipping_cost" value = "0">
+						<input hidden id = "order_total" name = "order_total" value = "{{order_total}}">
+						<input hidden id = "shipping_cost" name = "shipping_cost" value = "{{shipping_cost}}">
+						<input hidden id = "shipper_id" name = "shipper_id" value = "0">
 						<h1>Checkout - Shipping</h1>
 
 						<div class="nav flex-column flex-md-row nav-pills text-center">
@@ -242,6 +243,7 @@
 			
 			$("#s-h").html(ship_handling);
 			$("#shipping_cost").val(ship_handling);
+			$("#order_total").val(new_total);
 			
 			$("#ord-total").html(new_total);
 		}

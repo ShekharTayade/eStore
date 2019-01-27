@@ -20,9 +20,14 @@ today = datetime.date.today()
 def checkout_step1_address(request):
 
 	cart_id = request.POST.get('cart_id', '')
+	print(cart_id)
+	print(request.POST.get('sub_total', '0'))
+	
 	sub_total = Decimal(request.POST.get('sub_total', '0'))
 	tax = Decimal(request.POST.get('tax', '0'))	
-	disc_amt = request.POST.get('disc_amt_nv', '')
+	disc_amt = Decimal(request.POST.get('disc_amt_nv', ''))
+	cart_total = Decimal(request.POST.get('cart_total_nv', '0'))
+	
 	#discounted_amt = Decimal(request.POST.get('discounted_amt', '0'))
 	msg = ''
 
@@ -45,6 +50,7 @@ def checkout_step1_address(request):
 	shipping_addr = {}
 	
 	order_id = None
+	shipping_cost = 0
 	
 	# Check if order for cart_id is already created
 	order = Order.objects.filter(cart_id = cart_id).first()
@@ -54,6 +60,7 @@ def checkout_step1_address(request):
 		shipping_method = order.shipping_method
 		shipper = order.shipper
 		shipping_status = order.shipping_status
+		shipping_cost = order.shipping_cost
 
 		order_items = Order_items.objects.filter(order = order)
 		order_id = order.order_id
@@ -83,10 +90,9 @@ def checkout_step1_address(request):
 					acrylic = c.acrylic,
 					acrylic_size = c.acrylic_size,
 					stretch = c.stretch,
-					stretch_size = c.stretch,
+					stretch_size = c.stretch_size,
 					image_width = c.image_width,
-					image_height = c.image_height, 
-					updated_date =  today
+					image_height = c.image_height
 				).first()
 			
 				# If same item is found, then update only the quantity if different
@@ -102,6 +108,10 @@ def checkout_step1_address(request):
 							moulding = c.moulding,
 							moulding_size = c.moulding_size,
 							quantity = c.quantity,
+							item_unit_price = c.item_unit_price,
+							item_sub_total = c.item_sub_total,
+							item_discount_amt = c.item_disc_amt,
+							item_tax  = c.item_Tax,
 							item_total = c.item_total,
 							print_medium = c.print_medium,
 							print_medium_size = c.print_medium_size,
@@ -112,10 +122,11 @@ def checkout_step1_address(request):
 							acrylic = c.acrylic,
 							acrylic_size = c.acrylic_size,
 							stretch = c.stretch,
-							stretch_size = c.stretch,
+							stretch_size = c.stretch_size,
 							image_width = c.image_width,
 							image_height = c.image_height,
-							updated_date =  today
+							updated_date =  today																					
+							
 						)
 						ord_item.save()
 
@@ -123,26 +134,30 @@ def checkout_step1_address(request):
 					update_ord_itm = True
 					# Insert the new order item
 					new_ord_item = Order_items(
-						order = order,
-						product = c.product,
-						promotion = c.promotion,
-						moulding = c.moulding,
-						moulding_size = c.moulding_size,
-						quantity = c.quantity,
-						item_total = c.item_total,
-						print_medium = c.print_medium,
-						print_medium_size = c.print_medium_size,
-						mount = c.mount,
-						mount_size = c.mount_size,
-						board = c.board,
-						board_size = c.board_size,
-						acrylic = c.acrylic,
-						acrylic_size = c.acrylic_size,
-						stretch = c.stretch,
-						stretch_size = c.stretch,
-						image_width = c.image_width,
-						image_height = c.image_height,
-						updated_date =  today
+							order = order,
+							product = c.product,
+							promotion = c.promotion,
+							moulding = c.moulding,
+							moulding_size = c.moulding_size,
+							quantity = c.quantity,
+							item_unit_price = c.item_unit_price,
+							item_sub_total = c.item_sub_total,
+							item_discount_amt = c.item_disc_amt,
+							item_tax  = c.item_tax,
+							item_total = c.item_total,
+							print_medium = c.print_medium,
+							print_medium_size = c.print_medium_size,
+							mount = c.mount,
+							mount_size = c.mount_size,
+							board = c.board,
+							board_size = c.board_size,
+							acrylic = c.acrylic,
+							acrylic_size = c.acrylic_size,
+							stretch = c.stretch,
+							stretch_size = c.stretch_size,
+							image_width = c.image_width,
+							image_height = c.image_height,
+							updated_date =  today								
 					)
 					new_ord_item.save()
 				
@@ -151,24 +166,28 @@ def checkout_step1_address(request):
 				# Update Order for the quantity
 				ord = Order(
 					order_id = order.order_id,
+					order_date = order.order_date,
+					cart = usercart,
 					store_id = settings.STORE_ID,
-					session_id = usercart.session_id, 
+					session_id = usercart.session_id,
 					user = usercart.user,
 					voucher = usercart.voucher,
+					voucher_disc_amount = usercart.voucher_disc_amount,
 					quantity = usercart.quantity,
+					sub_total = usercart.cart_sub_total,
+					order_discount_amt = usercart.cart_disc_amt,
+					tax = usercart.cart_tax,
+					shipping_cost = order.shipping_cost,
 					order_total = usercart.cart_total,
-					sub_total = sub_total,
-					tax = tax,
-					shipping_method = shipping_method,
-					shipper = shipper,	
-					shipping_status = shipping_status,
-					cart = usercart,
+					shipping_method = order.shipping_method,
+					shipper = order.shipper,		
+					shipping_status = order.shipping_status,
 					updated_date =  today,
-					discount_amt = disc_amt,
-					order_status = order.order_status
+					order_status = order.order_status				
 				)
 				ord.save()
 				order_id = ord.order_id
+				shipping_cost = ord.shipping_cost
 		except Error as e:
 			msg = 'Apologies!! Could not save your cart. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.'
 		
@@ -177,26 +196,29 @@ def checkout_step1_address(request):
 		
 		try:
 			new_ord = Order(
+				order_date = None,
+				cart = usercart,
 				store_id = settings.STORE_ID,
-				session_id = usercart.session_id, 
+				session_id = usercart.session_id,
 				user = usercart.user,
 				voucher = usercart.voucher,
+				voucher_disc_amount = usercart.voucher_disc_amount,
 				quantity = usercart.quantity,
+				sub_total = usercart.cart_sub_total,
+				order_discount_amt = usercart.cart_disc_amt,
+				tax = usercart.cart_tax,
+				shipping_cost = 0,
 				order_total = usercart.cart_total,
-				sub_total = sub_total,
-				tax = tax,
 				shipping_method = None,
-				shipper = None,	
+				shipper = None,		
 				shipping_status = None,
-				cart = usercart,
 				updated_date =  today,
-				discount_amt = disc_amt,
-				order_status = 'PP'
-				
+				order_status = 'PP'				
 			)
 			
 			new_ord.save()
 			order_id = new_ord.order_id
+			shipping_cost = 0 # as it's newly created order
 
 			ord_total = new_ord.order_total
 
@@ -209,6 +231,10 @@ def checkout_step1_address(request):
 					moulding = c.moulding,
 					moulding_size = c.moulding_size,
 					quantity = c.quantity,
+					item_unit_price = c.item_unit_price,
+					item_sub_total = c.item_sub_total,
+					item_discount_amt = c.item_disc_amt,
+					item_tax  = c.item_tax,
 					item_total = c.item_total,
 					print_medium = c.print_medium,
 					print_medium_size = c.print_medium_size,
@@ -219,10 +245,10 @@ def checkout_step1_address(request):
 					acrylic = c.acrylic,
 					acrylic_size = c.acrylic_size,
 					stretch = c.stretch,
-					stretch_size = c.stretch,
+					stretch_size = c.stretch_size,
 					image_width = c.image_width,
 					image_height = c.image_height,
-					updated_date =  today
+					updated_date =  today							
 				)
 				new_ord_items.save()
 				
@@ -263,7 +289,7 @@ def checkout_step1_address(request):
 	
 	return render(request, "eStore/checkout_step1_address_new.html", {'order_total':usercart.cart_total,
 					'sub_total':sub_total, 'tax':tax,'shipping_addr':shipping_addr, 'billing_addr':billing_addr,
-					'disc_amt':disc_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
+					'disc_amt':disc_amt, 'country_arr':country_arr, 'state_arr':state_arr,  'shipping_cost':shipping_cost,
 					'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'order_id':order_id})
 					
 @csrf_exempt					
@@ -345,7 +371,6 @@ def checkout_saveAddr_shippingMethod(request):
 	shipping_full_name = request.POST.get('shipping_full_name', '')
 	shipping_phone_number = request.POST.get('shipping_phone_number', '')
 	shipping_email_id = request.POST.get('shipping_email_id', '')
-	shipping_phone_number = request.POST.get('shipping_phone_number', '')
 	shipping_company = request.POST.get('shipping_company', '')
 	shipping_address_1 = request.POST.get('shipping_address_1', '')
 	shipping_address_2 = request.POST.get('shipping_address_2', '')
@@ -359,7 +384,6 @@ def checkout_saveAddr_shippingMethod(request):
 	billing_full_name = request.POST.get('billing_full_name', '')
 	billing_phone_number = request.POST.get('billing_phone_number', '')
 	billing_email_id = request.POST.get('billing_email_id', '')
-	billing_phone_number = request.POST.get('billing_phone_number', '')
 	billing_company = request.POST.get('billing_company', '')
 	billing_address_1 = request.POST.get('billing_address_1', '')
 	billing_address_2 = request.POST.get('billing_address_2', '')
@@ -524,19 +548,19 @@ def checkout_saveAddr_shippingMethod(request):
 	pin_code_arr = []
 	for p in pin_code_list:
 		pin_code_arr.append(p.pin_code)
-	
+
 	
 	# if there is any error, return to the same page
 	if len(err_msg) > 0 :
 		return render(request, "eStore/checkout_step1_address_new.html", {'msg':err_msg, 'order_total':order.order_total,
-						'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,
-						'disc_amt':order.discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
+						'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,  'shipping_cost':order.shipping_cost,
+						'disc_amt':order.order_discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
 						'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'order_id':order_id, 'cart_id':order.cart_id})
 	else:
 		return render(request, "eStore/checkout_step2_shipping_method.html", { 
-				'order_total':order.order_total, 'order_id': order_id,
+				'order_total':order.order_total, 'order_id': order_id, 'shipping_cost':order.shipping_cost,
 				'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,
-				'disc_amt':order.discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
+				'disc_amt':order.order_discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
 				'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'cart_id':order.cart_id})
 
 def checkout_step3_order_review(request):
@@ -547,6 +571,8 @@ def checkout_step3_order_review(request):
 	tax = Decimal(request.POST.get("tax", "0"))
 	disc_amt = Decimal(request.POST.get("disc_amt", "0"))
 	order_total = Decimal(request.POST.get("order_total","0"))
+	print(order_total)
+	
 	shipping_method = request.POST.get("shipping_method","")
 	shipping_cost = Decimal(request.POST.get("shipping_cost","0"))
 	shipper = request.POST.get("shipper","")
@@ -555,10 +581,15 @@ def checkout_step3_order_review(request):
 		return render(request, "eStore/checkout_step3_order_Review.html", {'msg':'NO ORDER FOUND!!'})
 	
 	order = Order.objects.get(pk = order_id)
-	order_items = Order_items.objects.filter(order = order)
+	if not order :
+		return render(request, "eStore/checkout_step3_order_Review.html", {'msg':'NO ORDER FOUND!!'})
+	
+	order_items = Order_items.objects.filter(order = order).first()
+	usercart = Cart.objects.filter(cart_id = order.cart_id).first()
 	usercartitems = Cart_item.objects.select_related('product', 'promotion').filter(cart = order.cart_id,
 		product__product_image__image_type='THUMBNAIL').values(
-		'cart_item_id', 'product_id', 'quantity', 'item_total', 'moulding_id',
+		'cart_item_id', 'product_id', 'quantity', 'item_total', 'item_sub_total', 'item_tax', 'item_disc_amt',
+		'moulding_id', 'item_unit_price',
 		'moulding__name', 'moulding__width_inches', 'print_medium_id', 'mount_id', 'mount__name',
 		'acrylic_id', 'mount_size', 'product__name', 'image_width', 'image_height',
 		'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color'
@@ -567,27 +598,51 @@ def checkout_step3_order_review(request):
 	# Update the order, for shipping
 	if order :
 		try:
-		
+			# Update only the order total, shipping_method(it is currently None), shipping cost and shipper(it is currently None)
+			# All these have to relooked at after shipping is decided.
+			# So, at the moment only shipping cost and order total is updated
 			o = Order(
 				order_id = order_id,
-				store_id = order.store_id,
-				session_id = order.session_id, 
-				user = order.user,
-				voucher = order.voucher,
-				quantity = order.quantity,
-				order_total = order_total,
-				sub_total = sub_total,
-				tax = tax,
-				shipping_method_id = shipping_method,
-				shipper_id = shipper,	
-				shipping_status = order.shipping_status,
+				order_date = order.order_date,
+				cart = usercart,
+				store_id = settings.STORE_ID,
+				session_id = usercart.session_id,
+				user = usercart.user,
+				voucher = usercart.voucher,
+				voucher_disc_amount = usercart.voucher_disc_amount,
+				quantity = usercart.quantity,
+				sub_total = usercart.cart_sub_total,
+				order_discount_amt = usercart.cart_disc_amt,
+				tax = usercart.cart_tax,
 				shipping_cost = shipping_cost,
-				cart = order.cart,
+				order_total = order_total,
+				shipping_method = order.shipping_method,
+				shipper = order.shipper,		
+				shipping_status = order.shipping_status,
 				updated_date =  today,
-				discount_amt = order.discount_amt,
-				order_status = order.order_status
-			)			
+				order_status = order.order_status	
+			)	
+
 			o.save()
+			
+			# also update the associated cart for the shipping cost and total cost.
+			c = Cart(
+				cart_id = usercart.cart_id,
+				store = usercart.store,
+				user_id = usercart.user_id,
+				session_id = usercart.session_id,
+				quantity =  usercart.quantity,
+				cart_sub_total = usercart.cart_sub_total,
+				cart_disc_amt  = usercart.cart_disc_amt,
+				cart_tax  = usercart.cart_tax,
+				cart_total = order_total ,
+				voucher_id = usercart.voucher_id,
+				voucher_disc_amount = usercart.voucher_disc_amount,
+				updated_date = today,
+				cart_status = usercart.cart_status
+
+			)
+			c.save()			
 	
 		except IntegrityError as e:
 			err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" and let us know. We will be glad to help you.')

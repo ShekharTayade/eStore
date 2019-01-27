@@ -65,7 +65,7 @@
 	
 	<!-- Login Modal -->
 	<div id="login-modal" tabindex="-1" role="dialog" aria-labelledby="Login" aria-hidden="true" class="modal fade">
-		<div class="modal-dialog modal-sm">
+		<div class="modal-dialog modal-md">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Customer login</h5>
@@ -75,16 +75,24 @@
 					<form action = "{% url 'login'%}" method="post" accept-charset="UTF-8" role="form" method="POST">
 						 {% csrf_token %}
 						<div class="form-group">
-							<input name = "username" type="text" class="form-control" placeholder="Username">
-						</div>
-						<div class="form-group">
-							<input id="email-modal" name = "email" type="text" placeholder="email" class="form-control">
+							<p>Please Enter Your User Name or Email and password</p>
+							<div class = "row">
+								<div class ="col-sm-5">
+									<input name = "username" type="text" class="form-control" placeholder="Username">
+								</div>
+								<div class ="col-sm-1 text-center">
+									OR
+								</div>
+								<div class ="col-sm-6">
+									<input id="email-modal" name = "email" type="text" placeholder="email" class="form-control">
+								</div>
+							</div>
 						</div>
 						<div class="form-group">
 							<input id="password-modal" name = "password" type="password" placeholder="password" class="form-control">
 						</div>
 						<input name="remember" type="checkbox" value="Remember Me" checked> Remember Me						
-						<input hidden name="curr_pg" value="{{request.path}}" >						
+						<input hidden id="curr_pg" name="curr_pg" value="{{request.path}}" >						
 						<!-- To check if user is not authenticated and display an error message if not autheticated -->
 						<!-- The view returns a value "invalid" in invalid key if use if not authenticated. -->
 						<p>
@@ -99,6 +107,37 @@
 						<div id = "show-loginerror">
 						</div>
 					</form>
+					<hr>
+					<p>
+						Login Using Your Social Media Account
+					</p>
+					<div class = "well">
+						<div class = "row">
+							<div class="col-sm-3 text-center">
+								<a class="btn auth-provider-button hover-on" href="">
+								  <img src="{% static 'img/facebook_logo.svg' %}" alt="Facebook Login" style="height:38px;border:0;">
+								</a>
+							</div>
+							<div class="col-sm-3 text-center">
+								<a class="btn auth-provider-button hover-on" href="">
+								  <img src="{% static 'img/google_logo.svg' %}" alt="Google Login" style="height:38px;border:0;">
+								</a>
+							</div>
+							<div class="col-sm-3 text-center">
+								<a class="btn auth-provider-button hover-on" href="">
+								  <img src="{% static 'img/twitter_Logo.svg' %}" alt="Twitter Login" style="height:38px;border:0;">
+								</a>
+							</div>
+							<div class="col-sm-3 text-center">
+								<a class="btn auth-provider-button hover-on" href="">
+								  <img src="{% static 'img/instagram_logo.jpg' %}" alt="Instagram Login" style="height:38px;border:0;">
+								</a>
+							</div>
+						</div>
+					</div>
+					<hr>
+				
+					
 					<p class="text-center text-muted">Not registered yet?</p>
 					<p class="text-center text-muted"><a href=""><strong  class = "text-primary">Register now</strong></a>
 					! It is easy, done in a minute and gives you access to special offrers, discounts!</p>

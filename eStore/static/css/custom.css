@@ -684,3 +684,13 @@ top #phone-help .modal-header h5 {
 #cart td {
 	font-size: 0.75rem;
 }
+
+.auth-provider-button {
+    background-color: white;
+    border: 1px solid gray;
+}
+.hover-on:hover {
+    box-shadow: 7px 12px 13px rgba(0, 0, 0, 0.1);
+}
+  
+  

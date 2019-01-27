@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),	
     url(r'^register/$', views.register, name='register'),	
     url(r'^contact_us/$', views.contact_us, name='contact_us'),	
+    url(r'^contact_msg/$', views.contact_msg, name='contact_msg'),	
+	
     url(r'^about_us/$', views.about_us, name='about_us'),
     url(r'^terms_conditions/$', views.terms_conditions, name='terms_conditions'),
     
@@ -87,7 +89,7 @@ urlpatterns = [
 
 	
 	url(r'^promotion_products/$', views.promotion_products, name='promotion_products'),
-	
+	url(r'^architect_registration/$', views.profile_group, name='profile_group'),
 	
 	]
 	

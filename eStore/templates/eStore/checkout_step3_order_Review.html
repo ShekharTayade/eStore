@@ -36,7 +36,7 @@
 								<strong>Shipping & handling</strong>
 							</div>
 							<div class = "col-sm-12">		
-								<span id ="s-h" class = "ord-row">TBD</span>
+								<span id ="s-h" class = "ord-row">{{order.shipping_cost|floatformat}}</span>
 							</div>
 						</div>
 						<div class = "col-sm-2">
@@ -136,9 +136,10 @@
 								<table id = "cartTbl" class="table table-responsive">
 									<thead>
 										<tr>
-											<th width="20%">Name</th>
-											<th width="35%">Details</th>
-											<th width="15%" style="text-align:right">Quantity</th>
+											<th width="15%">Name</th>
+											<th width="30%">Details</th>
+											<th width="15%" style="text-align:right">Unit Price</th>
+											<th width="10%" style="text-align:right">Quantity</th>
 											<th width="15%" style="text-align:right">Discount</th>
 											<th width="15%" style="text-align:right">Total</th>
 										</tr>
@@ -178,6 +179,9 @@
 												{% endwith %}
 											</td>
 											<td style = "text-align:right">
+												{{i.item_unit_price}}
+											</td>
+											<td style = "text-align:right">
 												{{i.quantity}}
 											</td>
 											<!-- <td>{{i.product__price}}</td> -->
@@ -196,7 +200,13 @@
 									</tbody>
 									<tfoot>
 										<tr>
-											<th colspan="3">You Pay</th>
+											<th colspan="4"><small>Shipping & Handing</small></th>
+											<th colspan="2" style = "text-align:right">
+												<i class = "fa fa-inr"> </i> <small>{{order.shipping_cost|floatformat}}</small>
+											</th>
+											<th></th>
+										<tr>
+											<th colspan="4">Order Total</th>
 											<th colspan="2" style = "text-align:right">
 												<i class = "fa fa-inr"> </i> {{order.order_total|floatformat}}
 											</th>
