@@ -41,7 +41,7 @@ def menubar(request):
 	# Level 1
 	level1_menuitems = Product_category.objects.annotate(Count(
 			'product_product_category')).filter(parent_id__isnull = True,
-			product_product_category__count__gt = 100).order_by('-product_product_category__count')
+			product_product_category__count__gt = 1000).order_by('-product_product_category__count')
 
 	# Level 2
 	level2_menuitems = Product_category.objects.filter(parent_id__in = level1_menuitems)
@@ -59,9 +59,9 @@ def menubar(request):
 		if request.user.is_authenticated:
 			
 			userid = User.objects.get(username = request.user)
-			usercart = Cart.objects.get(user_id = userid)
+			usercart = Cart.objects.get(user_id = userid, cart_status = "AC")
 		else:
-			usercart = Cart.objects.get(session_id = sessionid)
+			usercart = Cart.objects.get(session_id = sessionid, cart_status = "AC")
 	
 	except Cart.DoesNotExist:
 			usercart = {}
@@ -72,16 +72,16 @@ def menubar(request):
 			'usercart':usercart}
 
 @register.inclusion_tag('eStore/footer.html')	
-def site_footer():
+def site_footer(request):
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
 
-	return {'ecom_site':ecom}
+	return {'ecom_site':ecom, 'request':request, 'user': request.user}
 
 @register.inclusion_tag('eStore/copy_right.html')	
-def copy_right():
+def copy_right(request):
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
 
-	return {'ecom_site':ecom}
+	return {'ecom_site':ecom, 'request':request, 'user': request.user}
 
 
 @register.inclusion_tag('eStore/cart_update_message.html')	

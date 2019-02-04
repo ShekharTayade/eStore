@@ -12,10 +12,13 @@
 				{% if ecom_site.phone_support_available %}
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<a class = "text-white clickable" data-toggle="modal" data-target="#phone-help">
-						<i class="fa fa-phone"></i>&nbsp;Help								
+						<i class="fa fa-phone"></i>&nbsp;Live Support								
 					</a> 
 					<!--** pick up from DB (Link to Phone number display, if enabled)-->
 				{% endif %}
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a class = "text-white clickable" href="{% url 'contact_us' %}">Contact Us</a>
+
 			</div>
 			<div id="phone-help" tabindex="-1" role="dialog" aria-labelledby="Login" aria-hidden="true" class="modal fade">
 				<div class="modal-dialog modal-sm">
@@ -55,9 +58,8 @@
 
 					{% else %}
 						<li class="list-inline-item clickable"><a data-toggle="modal" data-target="#login-modal">Login</a></li>
-						<li class="list-inline-item"><a href="{% url 'register' %}">Register</a></li>
+						<li class="list-inline-item"><a href="{% url 'register' %}">Sign Up</a></li>
 					{% endif %}
-					<li class="list-inline-item"><a href="{% url 'contact_us' %}">Contact</a></li>
 				</ul>
 			</div>
 		</div>

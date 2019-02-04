@@ -8,19 +8,27 @@
 					<li><a href="{% url 'terms_conditions' %}">Terms and conditions</a></li>
 					<li><a href="{% url 'faq' %}">FAQ</a></li>
 				</ul>
-				<hr>
-				<h4 class="mb-3">User section</h4>
-				<ul class="list-unstyled">
-					<li>
-						<a href="#" data-toggle="modal" data-target="#login-modal">Login</a>
-					</li>
-					<li><a href="{% url 'register' %}">Register</a></li>
-				</ul>
 			</div>
 			<!-- /.col-lg-3-->
 			<div class="col-lg-3 col-md-6">
-				<!-- an empty grid, can be used for anything -->
-				&nbsp;
+				<h4 class="mb-3">User section</h4>
+				{% if user.is_authenticated %}
+					<ul class="list-unstyled">
+						<li><a href="#">My Account</a></li>
+						<li><a href="#">My Orders</a></li>
+						<li><a href="#">My Profile</a></li>
+						<li class="dropdown-divider"></li>
+						<li><a href="{% url 'logout' %}">Logout</a></li>
+						<li> <a href="{% url 'password_change' %}">Change Password</a></li>   
+					</ul>
+				{% else %}
+					<ul class="list-unstyled">
+						<li>
+							<a href="#" data-toggle="modal" data-target="#login-modal">Login</a>
+						</li>
+						<li><a href="{% url 'register' %}">Sign Up</a></li>
+					</ul>
+				{% endif %}
 			</div>
 			<!-- /.col-lg-3-->
 			<div class="col-lg-3 col-md-6">

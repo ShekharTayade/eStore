@@ -150,7 +150,7 @@ def add_to_cart(request):
 	if request.user.is_authenticated:
 		try:
 			userid = User.objects.get(username = request.user)
-			usercart = Cart.objects.get(user_id = userid) 
+			usercart = Cart.objects.get(user_id = userid, cart_status = "AC") 
 			#cart.objects.filter(user_id = userid)[:1]
 		except Cart.DoesNotExist:
 			usercart = {}
@@ -169,7 +169,7 @@ def add_to_cart(request):
 		else:
 			try:
 				# Get usercart by session
-				usercart = Cart.objects.get(session_id = sessionid)
+				usercart = Cart.objects.get(session_id = sessionid, cart_status="AC")
 				#cart.objects.filter(session_id = sessionid)[:1]
 			except Cart.DoesNotExist:
 				usercart = {}
@@ -362,14 +362,14 @@ def show_cart(request):
 	try:
 		if request.user.is_authenticated:
 			usr = User.objects.get(username = request.user)
-			usercart = Cart.objects.get(user = usr)
+			usercart = Cart.objects.get(user = usr, cart_status = "AC")
 		else:
 			sessionid = request.session.session_key		
 			if sessionid is None:
 				request.session.create()
 				sessionid = request.session.session_key
 				
-			usercart = Cart.objects.get(session_id = sessionid)
+			usercart = Cart.objects.get(session_id = sessionid, cart_status = "AC")
 
 		# If any order exists against this cart
 		order = Order.objects.filter(cart_id = usercart.cart_id).first()
@@ -427,7 +427,7 @@ def update_cart_item(request):
 		return JsonResponse({'msg':'Not cart items found for cart # ' + cart_item_id}, safe=False)	
 	
 	# Get the cart this item is associated with
-	cart = Cart.objects.filter(cart_id = cart_item.cart_id).first()
+	cart = Cart.objects.filter(cart_id = cart_item.cart_id, cart_status = "AC").first()
 	
 	# number of items in the cart
 	#num_cart_item = Cart_item.objects.filter(cart = cart)
@@ -651,7 +651,7 @@ def delete_cart_item(request):
 		return JsonResponse({'msg':'Not cart items found for cart # ' + cart_item_id}, safe=False)	
 	
 	# Get the cart this item is associated with
-	cart = Cart.objects.filter(cart_id = cart_item.cart_id).first()
+	cart = Cart.objects.filter(cart_id = cart_item.cart_id, cart_status = "AC").first()
 	
 	# number of items in the cart
 	num_cart_item = Cart_item.objects.filter(cart = cart).count()
@@ -804,24 +804,44 @@ def sync_cart_session_user(request, sessionid):
 	
 	try:
 		# Get usercart by session and user is None
-		usercart = Cart.objects.get(session_id = sessionid, user = None)
+		sessioncart = Cart.objects.get(session_id = sessionid, user = None, cart_status = "AC")
 	except Cart.DoesNotExist:
 		return JsonResponse({"status":"NOCART"})
 	
-	if usercart:
+	if sessioncart:
 		if request.user.is_authenticated:
 			try:
+			
+				# Check if the user already has a cart open
 				userid = User.objects.get(username = request.user)
-				# Update the Carr with current user id
+
+				cart = Cart.objects.filter(user = userid, cart_status = "AC")
+				# User already has a cart open, then return
+				if cart:
+					# Abondon the existing session cart & return back
+					updcart = Cart(
+						cart_id = sessioncart.cart_id,
+						store = sessioncart.store,
+						user_id = userid,
+						cart_total = sessioncart.cart_total,
+						session_id = sessioncart.session_id,
+						quantity =  sessioncart.quantity,
+						updated_date = sessioncart.updated_date,
+						cart_status = 'AB'
+					)						
+					updcart.save()
+					return JsonResponse({"status":"CARTOPEN"})
+			
+				# Update the session Carr with current user id
 				updcart = Cart(
-					cart_id = usercart.cart_id,
-					store = usercart.store,
+					cart_id = sessioncart.cart_id,
+					store = sessioncart.store,
 					user_id = userid,
-					cart_total = usercart.cart_total,
-					session_id = usercart.session_id,
-					quantity =  usercart.quantity,
-					updated_date = usercart.updated_date,
-					cart_status = usercart.cart_status
+					cart_total = sessioncart.cart_total,
+					session_id = sessioncart.session_id,
+					quantity =  sessioncart.quantity,
+					updated_date = sessioncart.updated_date,
+					cart_status = sessioncart.cart_status
 				)						
 				
 				updcart.save()
@@ -882,7 +902,7 @@ def apply_voucher(request):
 		disc_amount = voucher.discount_value
 		cart_total = cart_total - voucher.discount_value
 
-	cart = Cart.objects.filter(cart_id = cart_id).first()
+	cart = Cart.objects.filter(cart_id = cart_id, cart_status = "AC").first()
 	if cart.voucher_id:
 		return JsonResponse({"status":"ONLY-ONE"})
 		

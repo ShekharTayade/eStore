@@ -27,7 +27,7 @@ def eStorelogin(request):
 		next = request.POST['curr_pg']
 		
 		user = authenticate(request, email=email, username=username, password=password)
-       
+	   
 		if user is not None :
             
 			login(request, user)

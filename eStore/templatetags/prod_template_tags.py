@@ -94,7 +94,7 @@ def show_trending_categories():
 
 
 @register.inclusion_tag('eStore/show_frames_section.html')
-def show_frame_my_art():
+def show_frame_my_art(request):
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
 	
 	'''Get trending categories'''

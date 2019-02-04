@@ -407,8 +407,6 @@ class Product(models.Model):
 	size = models.CharField(max_length = 200, null=True)
 	default_frame = models.ForeignKey(Frame, models.CASCADE, null=True)
 
-	class Meta:
-		unique_together = ("store", "part_number")	
 		
 
 class Product_product_category(models.Model):

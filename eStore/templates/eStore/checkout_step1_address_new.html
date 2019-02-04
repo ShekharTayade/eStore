@@ -24,44 +24,44 @@
 						<span class="text-muted">Shipping and handing costs will be added based on the shipping method.</span>
 					</div>
 					<div class = "row">
-						<div class = "col-sm-3">
-							<div class = "col-sm-12">		
+						<div class = "col-xs-12 col-md-3">
+							<div class = "col-xs-7 col-md-12">		
 								<strong>Order subtotal</strong>
 							</div>
-							<div class = "col-sm-12">		
+							<div class = "col-xs-5 col-md-12">		
 								<span class = "ord-row">{{sub_total|floatformat}}</span>
 							</div>
 						</div>
-						<div class = "col-sm-3">
-							<div class = "col-sm-12">		
-								<strong>Shipping & handling</strong>
-							</div>
-							<div class = "col-sm-12">		
-								<span class = "ord-row">{{shipping_cost|floatformat}}</span>
-							</div>
-						</div>
-						<div class = "col-sm-2">
-							<div class = "col-sm-12">		
+						<div class = "col-xs-12 col-md-2">
+							<div class = "col-xs-7 col-md-12">		
 								<strong>Tax</strong>
 							</div>
-							<div class = "col-sm-12">		
+							<div class = "col-xs-5 col-md-12">		
 								<span class = "ord-row">{{tax|floatformat}}</span>
 							</div>
 						</div>
-						<div class = "col-sm-2">
-							<div class = "col-sm-12">		
+						<div class = "col-xs-12 col-md-3">
+							<div class = "col-xs-7 col-md-12">		
+								<strong>Shipping & handling</strong>
+							</div>
+							<div class = "col-sx-5 col-md-12">		
+								<span class = "ord-row">{{shipping_cost|floatformat}}</span>
+							</div>
+						</div>
+						<div class = "col-xs-12 col-md-2">
+							<div class = "col-xs-7 col-md-12">		
 								<strong>Order Total</strong>
 							</div>
-							<div class = "col-sm-12">		
+							<div class = "col-xs-5 col-md-12">		
 								<span class = "ord-row"><strong>{{order_total|floatformat}}</strong></span>
 							</div>
 						</div>
 						{% if disc_amt %}
-						<div class = "col-sm-2">
-							<div class = "col-sm-12">		
+						<div class = "col-xs-12 col-md-2">
+							<div class = "col-xs-7 col-md-12">		
 								<strong>Your Saving</strong>
 							</div>
-							<div class = "col-sm-12">		
+							<div class = "col-xs-5 col-md-12">		
 								<span style = "color:green">{{disc_amt|floatformat}}</span>
 							</div>
 						</div>

@@ -38,7 +38,7 @@ def checkout_step1_address(request):
 	### CREATE THE ORDER
 	#############################################################
 	# get cart details
-	usercart = Cart.objects.filter(cart_id = cart_id).first()
+	usercart = Cart.objects.filter(cart_id = cart_id, cart_status = "AC").first()
 	usercart_items = Cart_item.objects.filter(cart_id = cart_id)
 
 	if not usercart_items:
@@ -585,7 +585,7 @@ def checkout_step3_order_review(request):
 		return render(request, "eStore/checkout_step3_order_Review.html", {'msg':'NO ORDER FOUND!!'})
 	
 	order_items = Order_items.objects.filter(order = order).first()
-	usercart = Cart.objects.filter(cart_id = order.cart_id).first()
+	usercart = Cart.objects.filter(cart_id = order.cart_id, cart_status = "AC").first()
 	usercartitems = Cart_item.objects.select_related('product', 'promotion').filter(cart = order.cart_id,
 		product__product_image__image_type='THUMBNAIL').values(
 		'cart_item_id', 'product_id', 'quantity', 'item_total', 'item_sub_total', 'item_tax', 'item_disc_amt',

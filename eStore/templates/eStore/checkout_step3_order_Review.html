@@ -31,6 +31,14 @@
 								<span class = "ord-row">{{order.sub_total|floatformat}}</span>
 							</div>
 						</div>
+						<div class = "col-sm-2">
+							<div class = "col-sm-12">		
+								<strong>Tax</strong>
+							</div>
+							<div class = "col-sm-12">		
+								<span class = "ord-row">{{order.tax|floatformat}}</span>
+							</div>
+						</div>
 						<div class = "col-sm-3">
 							<div class = "col-sm-12">		
 								<strong>Shipping & handling</strong>
@@ -41,27 +49,19 @@
 						</div>
 						<div class = "col-sm-2">
 							<div class = "col-sm-12">		
-								<strong>Tax</strong>
-							</div>
-							<div class = "col-sm-12">		
-								<span class = "ord-row">{{order.tax|floatformat}}</span>
-							</div>
-						</div>
-						<div class = "col-sm-2">
-							<div class = "col-sm-12">		
 								<strong>Order Total</strong>
 							</div>
 							<div class = "col-sm-12">		
 								<span id ="ord-total" class = "ord-row"><strong>{{order.order_total|floatformat}}</strong></span>
 							</div>
 						</div>
-						{% if order.discount_amt %}
+						{% if order.order_discount_amt %}
 						<div class = "col-sm-2">
 							<div class = "col-sm-12">		
 								<strong>Your Saving</strong>
 							</div>
 							<div class = "col-sm-12">		
-								<span style = "color:green">{{order.discount_amt|floatformat}}</span>
+								<span style = "color:green">{{order.order_discount_amt|floatformat}}</span>
 							</div>
 						</div>
 						{% endif %}
@@ -202,9 +202,17 @@
 										<tr>
 											<th colspan="4"><small>Shipping & Handing</small></th>
 											<th colspan="2" style = "text-align:right">
-												<i class = "fa fa-inr"> </i> <small>{{order.shipping_cost|floatformat}}</small>
+												<small>{{order.shipping_cost|floatformat}}</small>
 											</th>
 											<th></th>
+										</tr>
+										<tr>
+											<th colspan="4"><small>Discount</small></th>
+											<th colspan="2" style = "text-align:right">
+												<small>- ({{order.order_discount_amt|floatformat}})</small>
+											</th>
+											<th></th>
+										</tr>
 										<tr>
 											<th colspan="4">Order Total</th>
 											<th colspan="2" style = "text-align:right">

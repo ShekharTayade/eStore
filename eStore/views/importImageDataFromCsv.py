@@ -30,8 +30,10 @@ def importImageData(request):
 			if cnt == 0:
 				cnt = cnt + 1
 				continue
-
-			print(row[4])
+			
+			if cnt < 5000:
+				cnt = cnt + 1
+				continue
  
 			''' Get all the images IDs from DB table "product" in an array '''
 			if row[0]:
@@ -65,7 +67,6 @@ def importImageData(request):
 					
 
 				'''Update '''
-				print("Updating")
 				'''							'''
 				'''Insert into attributes 	'''
 				'''							'''
@@ -281,7 +282,6 @@ def importImageData(request):
 				'''					'''
 				''' Publisher Price '''
 				'''					'''
-				print( row[1] )
 				publisher = Publisher.objects.filter(publisher_id = row[1]).first()
 				if not publisher:
 					pub = 	Publisher( 
@@ -291,20 +291,37 @@ def importImageData(request):
 					)
 					pub.save()
 					
-				publ_price = Publisher_price.objects.filter(publisher_id = row[1], print_medium_id = 'PAPER').first()
+				publ_price = Publisher_price.objects.filter(publisher_id = row[1], 
+					print_medium_id = 'PAPER').first()
 				if not publ_price:
 				
 					pub_price = Publisher_price (
 						publisher_id = row[1],
 						print_medium_id = 'PAPER',
 						price_type_id = 'SQIN',
-						price = 3500
+						price = 10.50
 					)
 
 					pub_price.save()	
+
+				publ_price = Publisher_price.objects.filter(publisher_id = row[1], 
+					print_medium_id = 'CANVAS').first()
+				if not publ_price:
+				
+					pub_price = Publisher_price (
+						publisher_id = row[1],
+						print_medium_id = 'CANVAS',
+						price_type_id = 'SQIN',
+						price = 12.50
+					)
+
+					pub_price.save()	
+
 					
 			cnt = cnt + 1
-			if cnt > 5000:
+			print(cnt)
+			
+			if cnt > 50000:
 				break
 				
 	return render(request, "eStore/import_image_data.html")
