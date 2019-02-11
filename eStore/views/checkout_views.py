@@ -20,15 +20,11 @@ today = datetime.date.today()
 def checkout_step1_address(request):
 
 	cart_id = request.POST.get('cart_id', '')
-	print(cart_id)
-	print(request.POST.get('sub_total', '0'))
-	
 	sub_total = Decimal(request.POST.get('sub_total', '0'))
 	tax = Decimal(request.POST.get('tax', '0'))	
 	disc_amt = Decimal(request.POST.get('disc_amt_nv', ''))
 	cart_total = Decimal(request.POST.get('cart_total_nv', '0'))
-	
-	#discounted_amt = Decimal(request.POST.get('discounted_amt', '0'))
+
 	msg = ''
 
 	if cart_id == '':
@@ -77,7 +73,9 @@ def checkout_step1_address(request):
 			
 				ord_itm = order_items.filter( order = order,
 					product = c.product,
+					user_image = c.user_image,
 					promotion = c.promotion,
+					frame_promotion = c.frame_promotion,
 					moulding = c.moulding,
 					moulding_size = c.moulding_size,
 					item_total = c.item_total,
@@ -104,7 +102,9 @@ def checkout_step1_address(request):
 							order_item_id = ord_itm.order_item_id,
 							order = order,
 							product = c.product,
+							user_image = c.user_image,
 							promotion = c.promotion,
+							frame_promotion = c.frame_promotion,
 							moulding = c.moulding,
 							moulding_size = c.moulding_size,
 							quantity = c.quantity,
@@ -136,7 +136,9 @@ def checkout_step1_address(request):
 					new_ord_item = Order_items(
 							order = order,
 							product = c.product,
+							user_image = c.user_image,
 							promotion = c.promotion,
+							frame_promotion = c.frame_promotion,
 							moulding = c.moulding,
 							moulding_size = c.moulding_size,
 							quantity = c.quantity,
@@ -227,7 +229,9 @@ def checkout_step1_address(request):
 				new_ord_items = Order_items(
 					order = new_ord,
 					product = c.product,
+					user_image = c.user_image,
 					promotion = c.promotion,
+					frame_promotion = c.frame_promotion,
 					moulding = c.moulding,
 					moulding_size = c.moulding_size,
 					quantity = c.quantity,
@@ -430,7 +434,10 @@ def checkout_saveAddr_shippingMethod(request):
 	
 	try:
 		user = User.objects.get(username = request.user)
-		
+	except User.DoesNotExist:
+		user = None
+	
+	try:
 		# Check if the order shipping, billing record already exists
 		ord_shipping = Order_shipping.objects.filter(order = order).first()
 		ord_billing = Order_billing.objects.filter(order = order).first()
@@ -595,6 +602,15 @@ def checkout_step3_order_review(request):
 		'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color'
 		)
 	
+	# Let's get the user uploaded images, if any
+	user_image = Cart_item.objects.select_related('user_image', 'frame_promotion').filter(
+		cart = usercart.cart_id, product__isnull = True).values(
+		'cart_item_id', 'user_image_id', 'user_image__image_to_frame', 'quantity', 'item_total', 'moulding_id',
+		'moulding__name', 'moulding__width_inches', 'print_medium_id', 'mount_id', 'mount__name',
+		'acrylic_id', 'mount_size', 'product__name', 'image_width', 'image_height',
+		'product__product_image__url', 'cart_id', 'promotion__discount_value', 'promotion__discount_type', 'mount__color',
+		'item_unit_price', 'item_sub_total', 'item_disc_amt', 'item_tax', 'item_total'
+		)
 	# Update the order, for shipping
 	if order :
 		try:
@@ -652,6 +668,6 @@ def checkout_step3_order_review(request):
 	
 	
 	return render(request, "eStore/checkout_step3_order_Review.html", {'order':o, 'order_items':order_items, 
-				'usercartitems':usercartitems})
+				'usercartitems':usercartitems, 'user_image':user_image})
 	
 	

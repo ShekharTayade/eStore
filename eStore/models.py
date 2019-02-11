@@ -6,7 +6,8 @@ from django.db.models.fields import DecimalField
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+import os
+from PIL import Image, ExifTags
 
 class Ecom_site(models.Model):
 	store_id = models.AutoField(primary_key=True, null=False)
@@ -93,6 +94,7 @@ class Voucher_user(models.Model):
 # New Arrival, Sale, Promotion etc...
 class Promotion(models.Model):
 	promotion_id = models.AutoField(primary_key=True, null=False)
+	type = models.CharField(max_length = 5, null=True) # Not used at the moment
 	store = models.ForeignKey(Ecom_site, models.CASCADE)
 	effective_from = models.DateField(blank=True, null=True)
 	effective_to = models.DateField(blank=True, null=True)
@@ -105,6 +107,13 @@ class Promotion(models.Model):
 	def __str__(self):
 		return self.promotion_id
 
+class Frame_promotion(models.Model):
+	promotion_id = models.AutoField(primary_key=True, null=False)
+	store = models.ForeignKey(Ecom_site, models.CASCADE)
+	effective_from = models.DateField(blank=True, null=True)
+	effective_to = models.DateField(blank=True, null=True)
+	discount_type = models.CharField(max_length = 10, null=False)  # PERCETNAGE or CASH
+	discount_value = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)		
 	
 class Promotion_images(models.Model):
 	image_id = models.AutoField(primary_key=True, null=False)
@@ -353,6 +362,7 @@ class Product_category(models.Model):
         on_delete=models.CASCADE)
 	trending = models.BooleanField(null=False, default=False)
 	url = models.CharField(max_length = 1000, blank=True, default='')
+	featured_collection = models.BooleanField(null=False, default=False)
 
 	def __str__(self):
 		return self.name
@@ -457,7 +467,8 @@ class Promotion_product(models.Model):
 		return str(self.promotion_id)
 		
 	class Meta:
-		unique_together = ("promotion", "product")		
+		unique_together = ("promotion", "product")	
+		
 	
 class Product_collection(models.Model):
 	store = models.ForeignKey(Ecom_site, models.CASCADE)
@@ -621,14 +632,33 @@ class Moulding_image(models.Model):
 	
 	class Meta:
 		unique_together = ("moulding", "image_type")	
+
+class Promotion_frame(models.Model):
+	frame_promotion = models.ForeignKey(Frame_promotion, models.CASCADE, null=False)
+	moulding = models.ForeignKey(Moulding, models.CASCADE, null=False)
+
+	def __str__(self):
+		return str(self.promotion_id)
 		
+	class Meta:
+		unique_together = ("frame_promotion", "moulding")			
+
+		
+class User_image (models.Model):
+	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
+	user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+	image_to_frame = models.ImageField(upload_to='uploads/%Y/%m/%d/', blank=True, default="")
+	status = models.CharField(max_length = 3, blank=True, null=False)
+	created_date = models.DateTimeField(auto_now_add=True, null=False)	
+	updated_date = models.DateTimeField(auto_now=True, null=False)	
+
 		
 class Cart(models.Model):
 	cart_id = models.AutoField(primary_key=True, null=False)
-	store = models.ForeignKey(Ecom_site, models.CASCADE)
+	store = models.ForeignKey(Ecom_site, models.PROTECT)
 	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
-	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-	voucher = models.ForeignKey(Voucher, models.CASCADE, null=True)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+	voucher = models.ForeignKey(Voucher, models.PROTECT, null=True)
 	voucher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	quantity = models.IntegerField(null=True)
 	cart_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
@@ -640,26 +670,28 @@ class Cart(models.Model):
 	
 class Cart_item(models.Model):
 	cart_item_id = models.AutoField(primary_key=True, null=False)
-	cart = models.ForeignKey(Cart,on_delete=models.CASCADE, null=False)
-	product = models.ForeignKey(Product,on_delete=models.CASCADE, null=False)
-	promotion = models.ForeignKey(Promotion, models.CASCADE, null=True)
+	cart = models.ForeignKey(Cart,on_delete=models.PROTECT, null=False)
+	product = models.ForeignKey(Product,on_delete=models.PROTECT, null=True)
+	user_image = models.ForeignKey(User_image,on_delete=models.PROTECT, null=True)
+	promotion = models.ForeignKey(Promotion, models.PROTECT, null=True)
+	frame_promotion = models.ForeignKey(Frame_promotion, models.PROTECT, null=True)
 	quantity = models.IntegerField(null=False)
 	item_unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	item_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	item_disc_amt  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	item_tax  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	item_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
-	moulding = models.ForeignKey(Moulding,on_delete=models.CASCADE, null=True)
+	moulding = models.ForeignKey(Moulding,on_delete=models.PROTECT, null=True)
 	moulding_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	print_medium = models.ForeignKey(Print_medium, models.CASCADE, null=False, default='PAPER')
+	print_medium = models.ForeignKey(Print_medium, models.PROTECT, null=False, default='PAPER')
 	print_medium_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	mount = models.ForeignKey(Mount, models.CASCADE, null=True)
+	mount = models.ForeignKey(Mount, models.PROTECT, null=True)
 	mount_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	board = models.ForeignKey(Board, models.CASCADE, null=True)
+	board = models.ForeignKey(Board, models.PROTECT, null=True)
 	board_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	acrylic = models.ForeignKey(Acrylic, models.CASCADE, null=True)
+	acrylic = models.ForeignKey(Acrylic, models.PROTECT, null=True)
 	acrylic_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	stretch = models.ForeignKey(Stretch, models.CASCADE, null=True)
+	stretch = models.ForeignKey(Stretch, models.PROTECT, null=True)
 	stretch_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	image_width = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)
 	image_height = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)	
@@ -673,11 +705,11 @@ class Cart_item(models.Model):
 class Order (models.Model):
 	order_id = models.AutoField(primary_key=True, null=False)
 	order_date =  models.DateField(blank=True, null=True)
-	cart = models.ForeignKey(Cart,on_delete=models.CASCADE, null=False)
-	store = models.ForeignKey(Ecom_site, models.CASCADE)
+	cart = models.ForeignKey(Cart,on_delete=models.PROTECT, null=False)
+	store = models.ForeignKey(Ecom_site, models.PROTECT)
 	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
-	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-	voucher = models.ForeignKey(Voucher, models.CASCADE, null=True)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+	voucher = models.ForeignKey(Voucher, models.PROTECT, null=True)
 	voucher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	quantity = models.IntegerField(null=True)
 	sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
@@ -685,18 +717,20 @@ class Order (models.Model):
 	tax = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	order_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
-	shipping_method = models.ForeignKey(Shipping_method, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup
-	shipper = models.ForeignKey(Shipper, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup	
-	shipping_status = models. ForeignKey(Shipping_status, models.CASCADE, null=True) #Null is allowed, in case it's a store pickup
+	shipping_method = models.ForeignKey(Shipping_method, models.PROTECT, null=True) #Null is allowed, in case it's a store pickup
+	shipper = models.ForeignKey(Shipper, models.PROTECT, null=True) #Null is allowed, in case it's a store pickup	
+	shipping_status = models. ForeignKey(Shipping_status, models.PROTECT, null=True) #Null is allowed, in case it's a store pickup
 	updated_date =  models.DateField(blank=True, null=True)
 	order_status = models.CharField(max_length = 2, blank=True, default='PP') #"PP" Payment Pending, "AB":Abandoned, "CO" Complete
 	
 class Order_items (models.Model):
 	order_item_id = models.AutoField(primary_key=True, null=False)
-	order = models.ForeignKey(Order,on_delete=models.CASCADE, null=False)
-	product = models.ForeignKey(Product,on_delete=models.CASCADE, null=False)
-	promotion = models.ForeignKey(Promotion, models.CASCADE, null=True)
-	moulding = models.ForeignKey(Moulding,on_delete=models.CASCADE, null=True)
+	order = models.ForeignKey(Order,on_delete=models.PROTECT, null=False)
+	product = models.ForeignKey(Product,on_delete=models.PROTECT, null=True)
+	user_image = models.ForeignKey(User_image,on_delete=models.PROTECT, null=True)
+	promotion = models.ForeignKey(Promotion, models.PROTECT, null=True)
+	frame_promotion = models.ForeignKey(Frame_promotion, models.PROTECT, null=True)
+	moulding = models.ForeignKey(Moulding,on_delete=models.PROTECT, null=True)
 	moulding_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	quantity = models.IntegerField(null=False)
 	item_unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
@@ -704,15 +738,15 @@ class Order_items (models.Model):
 	item_discount_amt = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
 	item_tax  = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
 	item_total = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
-	print_medium = models.ForeignKey(Print_medium, models.CASCADE, null=False, default='PAPER')
+	print_medium = models.ForeignKey(Print_medium, models.PROTECT, null=False, default='PAPER')
 	print_medium_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	mount = models.ForeignKey(Mount, models.CASCADE, null=True)
+	mount = models.ForeignKey(Mount, models.PROTECT, null=True)
 	mount_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	board = models.ForeignKey(Board, models.CASCADE, null=True)
+	board = models.ForeignKey(Board, models.PROTECT, null=True)
 	board_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	acrylic = models.ForeignKey(Acrylic, models.CASCADE, null=True)
+	acrylic = models.ForeignKey(Acrylic, models.PROTECT, null=True)
 	acrylic_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-	stretch = models.ForeignKey(Stretch, models.CASCADE, null=True)
+	stretch = models.ForeignKey(Stretch, models.PROTECT, null=True)
 	stretch_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	image_width = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)
 	image_height = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)
@@ -728,8 +762,8 @@ class Order_shipping (models.Model):
         Order,
         on_delete=models.CASCADE,
     )
-	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-	shipping_address = models.ForeignKey(User_shipping_address, models.CASCADE, null=True) # can be null if user ordering is anonymous
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+	shipping_address = models.ForeignKey(User_shipping_address, models.PROTECT, null=True) # can be null if user ordering is anonymous
 	full_name = models.CharField(max_length=500, blank=False, null=False)
 	Company = models.CharField(max_length=600, blank=True, default='')
 	address_1 = models.CharField(max_length=600, blank=False, null=False)
@@ -745,22 +779,22 @@ class Order_shipping (models.Model):
 	
 class Order_shipping_status_log (models.Model):
 	log_id = models.AutoField(primary_key=True, null=False)
-	order = models.ForeignKey(Order, models.CASCADE, null=True)
-	order_shipping_status =	models.ForeignKey(Shipping_status, models.CASCADE, null=True)
+	order = models.ForeignKey(Order, models.PROTECT, null=True)
+	order_shipping_status =	models.ForeignKey(Shipping_status, models.PROTECT, null=True)
 	status_date = models.DateTimeField(blank=True, null=True)
 	updated_date =  models.DateField(blank=True, null=True)
 	
 
 class Order_billing (models.Model):
 	order_billing_id = models.AutoField(primary_key=True, null=False)
-	store = models.ForeignKey(Ecom_site, models.CASCADE)
+	store = models.ForeignKey(Ecom_site, models.PROTECT)
 	order = models.OneToOneField(
         Order,
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
 	billing_date =  models.DateField(blank=True, null=True)
-	user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-	billing_address = models.ForeignKey(User_billing_address, models.CASCADE, null=True)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+	billing_address = models.ForeignKey(User_billing_address, models.PROTECT, null=True)
 	full_name = models.CharField(max_length=500, blank=False, null=False)
 	Company = models.CharField(max_length=600, blank=True, default='')
 	address_1 = models.CharField(max_length=600, blank=False, null=False)
@@ -818,3 +852,40 @@ class Profile(models.Model):
 	pin_code = models.ForeignKey(Pin_code, on_delete = models.PROTECT, null=True)
 	country = models.ForeignKey(Country, on_delete = models.PROTECT, null=False, default= "IND")
 	phone_number = models.CharField(max_length=30, blank=True, default='')
+
+	
+class Generate_number_by_month(models.Model):
+	type = models.CharField(max_length = 50, null=False, primary_key = True)
+	description = models.CharField(max_length = 1000, null=True)
+	month_year = models.CharField(max_length = 6, null=False)
+	current_number = models.IntegerField(null=False)	
+	
+
+@receiver(post_save, sender=User_image, dispatch_uid="update_image_profile")
+def update_image(sender, instance, **kwargs):
+  if instance.image_to_frame:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    fullpath = BASE_DIR + instance.image_to_frame.url
+    rotate_image(fullpath)
+
+	
+def rotate_image(filepath):
+  try:
+    image = Image.open(filepath)
+    for orientation in ExifTags.TAGS.keys():
+      if ExifTags.TAGS[orientation] == 'Orientation':
+            break
+    exif = dict(image._getexif().items())
+
+    if exif[orientation] == 3:
+        image = image.rotate(180, expand=True)
+    elif exif[orientation] == 6:
+        image = image.rotate(270, expand=True)
+    elif exif[orientation] == 8:
+        image = image.rotate(90, expand=True)
+    image.save(filepath)
+    image.close()
+  except (AttributeError, KeyError, IndexError):
+    # cases: image don't have getexif
+    pass		
+	

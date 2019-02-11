@@ -6,7 +6,7 @@
 
 		<!-- ecom site logo -->
 		<a href="{% url 'index' %}" class="navbar-brand home">
-			<img src="{% static 'img/arteavenue.png' %}" alt="logo" class="d-none d-md-inline-block">
+			<img src="{% static 'img/artevenue_logo.png' %}" alt="logo" class="d-none d-md-inline-block">
 			<img src="{% static 'img/logo-small.png' %}" alt="{{ecom_site.store_name}}" class="d-inline-block d-md-none">
 			<span class="sr-only">{{ecom_site.store_name}} - go to homepage</span>
 		</a>
@@ -68,6 +68,43 @@
 						</li>
 					</ul>
 					{% endif %}
+					{% else %}
+					<ul class="dropdown-menu megamenu">
+						<li>
+							<div class="row">
+								<div class="col-md-6 col-lg-3">
+									<h5><a href="{% url 'user_image' %}" class="nav-link">Frame My Art</a></h5>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<ul class="dropdown-menu megamenu">
+						<li>
+							<div class="row">
+								<div class="col-md-6 col-lg-3">
+									<h5><a href="#" class="nav-link">Sale</a></h5>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<ul class="dropdown-menu megamenu">
+						<li>
+							<div class="row">
+								<div class="col-md-6 col-lg-3">
+									<h5><a href="#" class="nav-link">For Business</a></h5>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<ul class="dropdown-menu megamenu">
+						<li>
+							<div class="row">
+								<div class="col-md-6 col-lg-3">
+									<h5><a href="#" class="nav-link">Wish List</a></h5>
+								</div>
+							</div>
+						</li>
+					</ul>
 					{% endif %}
 				</li>
 				{% endfor main_menu %}

@@ -590,8 +590,6 @@
 					var currwidth = ui.value;
 					var currheight = Math.round(currwidth / ratio);
 					$("#size").html("Width: " + currwidth + ", Height: " + currheight);
-					//var sqin = currwidth * currheight;
-					//var print_medium = $('#print-medium-select').val();
 					
 					// Apply the moulding and mount when the size changes
 					print_medium_id = $('#print-medium-select').val();
@@ -602,26 +600,6 @@
 					}
 					//Calculate Total Price
 					calc_total_price('{{prod_detail.product_id}}');
-					
-					//Image price
-					//if (print_medium == "PAPER") {
-					//	if ("{{per_sqinch_paper}}" != "0") {
-					//		image_price = sqin * {{per_sqinch_paper}};
-					//		$("#prod-price").html(image_price);
-					//	} else {
-					//		alert("slideevent:Paper - Sorry, no price found");
-					//	}
-					//} else {
-					//	if (print_medium == "CANVAS") {
-					//		if ("{{per_sqinch_canvas}}" != "0") {
-					//			image_price = sqin * {{per_sqinch_canvas}};
-					//			$("#prod-price").html(image_price);
-					//		} else {
-					//		alert("slideevent:Canvas - Sorry, no price found");
-					//		}
-					//	}
-					
-					//}
 
 				}
 			});

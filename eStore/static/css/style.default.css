@@ -68,7 +68,8 @@ h1 {
 }
 
 .menu-large a.nav-link {
-  padding: 7px !important;
+ /*  padding: 7px !important; */
+  padding: 0px !important;
   padding-left: 0 !important;
 }
 
@@ -82,7 +83,7 @@ h1 {
 #top {
   background: RGB(80,80,80);
   /*#fff;*/
-  padding: 5px 0;
+  padding: 5px 1rem;
   /*border-bottom: 1px solid #e0e0e0;*/
 }
 
@@ -165,10 +166,10 @@ h1 {
 }
 
 .navbar .navbar-nav > .nav-item > .nav-link {
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
   letter-spacing: 0.1em;
   font-weight: 700;
-  padding: 15px 15px !important;
+  /* padding: 15px 15px !important; */
   color: #fff;
   /** #555; **/
 }

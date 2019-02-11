@@ -1,0 +1,41 @@
+{% load static %}
+<!-- Featured Category  Header -->
+<div id="collections">
+	<div class="box py-2">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h2 class="mb-0 text-center">Gift for Someone Special</h2>
+					<div class = "text-center">
+						<span class = "section-text">
+							eGift cards that you can use to make the occassion more special. 
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Featured items slider -->
+<div class="container">
+	<div class="product-slider owl-carousel owl-theme">
+		{% for c in featured_collection %}
+		<div class="item">  
+					{% with 'img/'|add:c.url as image_static %}
+					<div class="front"  style="margin:0px 2px 0px 2px !important;">
+						<a href="{% url 'category_products' c.category_id %}"> 
+							<img src="{% static image_static %}" alt="{{c.name}}" class="img-fluid img-container-cat">
+						</a>
+					</div>
+					{% endwith %}
+					<div class="text text-center">
+						<h5>
+							<a href="{% url 'category_products' c.category_id %}">{{ c.name }}</a>
+						</h5>
+					</div>
+					
+		</div>
+		{% endfor %}
+	</div>						
+</div>

@@ -101,22 +101,7 @@ def product_details(request, prod_id):
 	
 	# Check if request contains any components, if it does send the those to the front end
 	cart_item_id = request.GET.get('cart_item_id', '')
-	
-	'''
-		moulding_id = request.GET.get('moulding_id', '')
-		moulding_size = request.GET.get('moulding_size', '')
-		print_medium_size = request.GET.get('print_medium_size', '')
-		mount_id = request.GET.get('mount_id', '')
-		mount_size = request.GET.get('mount_size', '')
-		board_id = request.GET.get('board_id', '')
-		board_size = request.GET.get('board_size', '')
-		acrylic_id = request.GET.get('acrylic_id', '')
-		acrylic_size = request.GET.get('acrylic_size', '')
-		stretch_id = request.GET.get('stretch_id', '')
-		stretch_size = request.GET.get('stretch_size', '')
-		image_width = request.GET.get('image_width', '')
-		image_height = request.GET.get('image_height', '')
-	'''
+
 	cart_item = {}
 	if cart_item_id != '':
 		cart_item = Cart_item.objects.filter(cart_item_id = cart_item_id).first()
@@ -141,7 +126,7 @@ def show_mouldings(request):
 
 	if not request.is_ajax():
 		return
-
+	
 	# get mouldings
 	mouldings = get_mouldings(request)
 	
@@ -151,8 +136,6 @@ def show_mouldings(request):
 	if print_medium == "PAPER":
 		mouldings_apply = mouldings['paper_mouldings_apply']
 		mouldings_show = mouldings['paper_mouldings_show']
-
-	print(mouldings_show)
 		
 	return render(request, "eStore/mouldings_include.html", {
 		'mouldings_apply':mouldings_apply, 'mouldings_show':mouldings_show,
@@ -504,35 +487,30 @@ def get_item_price (request):
 
 		print( "Width: " + str(img_width) )
 		print( "height: " + str(img_height) )
-	
-
-		print( "Item Price: " + str(image_price) )
+		print( "Image Price: " + str(image_price) )
 		
 		# Acrylic Price		
 		acrylic_price = img_width * img_height * get_acrylic_price_by_id(acrylic_id)
 		item_price = item_price + acrylic_price
-
 		print( "Acrylic Price: " + str(acrylic_price))
 		
 		# Moulding price
 		moulding_price = (img_width + img_height) * 2 * get_moulding_price_by_id(moulding_id)
 		item_price = item_price + moulding_price
-
 		print( "Moulding Price: " + str(moulding_price))
 		
 		# Mount price
 		mount_price = Decimal( ((img_width + img_height) * 2 * mount_size) ) * get_mount_price_by_id(mount_id)
 		item_price = item_price + mount_price
-
 		print( "Mount Price: " + str(mount_price))
 		
 		# Board price
 		board_price = img_width * img_height * get_board_price_by_id(board_id)
 		item_price = item_price + board_price
-
 		print( "Board Price: " + str(board_price))
 
-		print( "Total Price: " + str(item_price))
+		print( "======================")
+		print( "Total Item Price: " + str(item_price))
 		
 		
 	elif print_medium_id == "CANVAS":
@@ -540,22 +518,20 @@ def get_item_price (request):
 		# Image price
 		image_price = img_width * img_height * per_sqinch_canvas
 		item_price = item_price + image_price
-
-		print( "Item Price: " + str(image_price))
+		print( "Image Price: " + str(image_price))
 
 		# Moulding price
 		moulding_price = (img_width + img_height) * 2 * get_moulding_price_by_id(moulding_id)
 		item_price = item_price + moulding_price
-
 		print( "Moulding Price: " + str(moulding_price))
 		
 		# Stretch price
 		stretch_price = img_width * img_height * get_stretch_price_by_id(stretch_id)
 		item_price = item_price + stretch_price
-	
 		print( "Stretch Price: " + str(stretch_price))
 
-		print( "Total Price: " + str(item_price))
+		print( "======================")
+		print( "Total Item Price: " + str(item_price))
 
 	
 	item_price_withoutdisc = round(item_price)
@@ -586,6 +562,7 @@ def get_item_price (request):
 		
 	item_price = round(item_price)
 
+	print( "======================")
 	print( "Disc Amt: " + str(disc_amt))
 	print( "Item Price: " + str(item_price))
 
@@ -630,41 +607,36 @@ def get_item_price_by_cart_item (cart_item_id):
 		# Image price
 		image_price = cart_item.image_width * cart_item.image_height * per_sqinch_paper
 		item_price = item_price + image_price
-
 		print( "Width: " + str(cart_item.image_width) )
 		print( "height: " + str(cart_item.image_height) )
-	
-
-		print( "Item Price: " + str(image_price) )
+		print( "Image Price: " + str(image_price) )
 		
 		# Acrylic Price		
 		if cart_item.acrylic_id:
 			acrylic_price = cart_item.image_width * cart_item.image_height * get_acrylic_price_by_id(cart_item.acrylic_id)
 			item_price = item_price + acrylic_price
-
 		print( "Acrylic Price: " + str(acrylic_price))
 		
 		# Moulding price
 		if cart_item.moulding_id:
 			moulding_price = (cart_item.image_width + cart_item.image_height) * 2 * get_moulding_price_by_id(cart_item.moulding_id)
 			item_price = item_price + moulding_price
-
 		print( "Moulding Price: " + str(moulding_price))
 		
 		# Mount price
 		if cart_item.mount_id:
 			mount_price = Decimal( ((cart_item.image_width + cart_item.image_height) * 2 * cart_item.mount_size) ) * get_mount_price_by_id(cart_item.mount_id)
 			item_price = item_price + mount_price
-
 		print( "Mount Price: " + str(mount_price))
 		
 		# Board price
 		board_price = cart_item.image_width * cart_item.image_height * get_board_price_by_id(cart_item.board_id)
 		item_price = item_price + board_price
-
 		print( "Board Price: " + str(board_price))
-
-		print( "Total Price: " + str(item_price))
+		
+		print( "======================")
+		print( "Total Item Price: " + str(item_price))
+		
 		
 		
 	elif cart_item.print_medium_id == "CANVAS":
@@ -672,14 +644,12 @@ def get_item_price_by_cart_item (cart_item_id):
 		# Image price
 		image_price = cart_item.image_width * cart_item.image_height * per_sqinch_canvas
 		item_price = item_price + image_price
-
-		print( "Item Price: " + str(image_price))
+		print( "Image Price: " + str(image_price))
 
 		# Moulding price
 		if cart_item.moulding_id:
 			moulding_price = (cart_item.image_width + cart_item.image_height) * 2 * get_moulding_price_by_id(cart_item.moulding_id)
 			item_price = item_price + moulding_price
-
 		print( "Moulding Price: " + str(moulding_price))
 		
 		# Stretch price
@@ -689,6 +659,7 @@ def get_item_price_by_cart_item (cart_item_id):
 	
 		print( "Stretch Price: " + str(stretch_price))
 
+		print( "======================")
 		print( "Total Price: " + str(item_price))
 
 	
@@ -717,6 +688,10 @@ def get_item_price_by_cart_item (cart_item_id):
 		disc_applied = True
 		
 	item_price = round(item_price)
+
+	print( "======================")
+	print( "Disc Amt: " + str(disc_amt))
+	print( "Item Price: " + str(item_price))
 
 
 	return ({"msg":msg, "item_price" : item_price, 'image_price':image_price, 'cash_disc':cash_disc,

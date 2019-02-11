@@ -29,7 +29,7 @@ def admin_menu(request):
 	return {'ecom_site':ecom, 'request':request, 'user': request.user}	
 	
 	
-@register.inclusion_tag('eStore/estore_menu.html')	
+@register.inclusion_tag('eStore/estore_menu1.html')	
 def menubar(request):
 
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
@@ -87,4 +87,16 @@ def copy_right(request):
 @register.inclusion_tag('eStore/cart_update_message.html')	
 def update_cart_message(result):
 	return ({'result':result})
+
+@register.inclusion_tag('eStore/client_speak.html')	
+def client_speak(request):
+	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
+
+	return {}
+
+@register.inclusion_tag('eStore/referral.html')	
+def show_referral():
+
+	return{}
+	
 	

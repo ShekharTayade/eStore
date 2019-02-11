@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from eStore.models import Profile, Contact_us
+from eStore.models import Profile, Contact_us, User_image
 from eStore.validators import validate_eStore_email, validate_contact_name
 from eStore.validators import validate_image_size, validate_india_mobile_no
 from django.core.validators import validate_slug, MinLengthValidator
@@ -62,5 +62,12 @@ class contactUsForm(forms.ModelForm):
 		model = Contact_us
 		fields = '__all__'
         
-	
+class User_imageForm(forms.ModelForm):
+	image_to_frame = forms.ImageField(
+		validators=[validate_image_size],
+		required=True
+	)	
+	class Meta:
+		model = User_image
+		fields = '__all__'
 

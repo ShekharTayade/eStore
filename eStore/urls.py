@@ -1,5 +1,7 @@
 from django.urls import path
 from django.conf.urls import url, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from . import views
 
@@ -7,6 +9,9 @@ from django.contrib.auth import views as auth_views
 from allauth.account.views import LoginView
 
 urlpatterns = [
+	
+    url(r'^$', views.index, name='index'),	
+
 	url(r'^accounts/', include('allauth.urls')),
     url(r'^login/$', views.eStorelogin, name='login'),	
 	url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
@@ -26,12 +31,9 @@ urlpatterns = [
        auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
        name='password_reset_complete'), 
 	
-	path('', views.index, name='index'),
+	#path('', views.index, name='index'),
 
-	
-	
-	
-    url(r'^$', views.index, name='index'),	
+
     url(r'^register/$', views.register, name='register'),	
     url(r'^contact_us/$', views.contact_us, name='contact_us'),	
     url(r'^contact_msg/$', views.contact_msg, name='contact_msg'),	
@@ -90,6 +92,17 @@ urlpatterns = [
 	
 	url(r'^promotion_products/$', views.promotion_products, name='promotion_products'),
 	url(r'^architect_registration/$', views.profile_group, name='profile_group'),
+
 	
-	]
+    url(r'^user_image/$', views.user_image, name='user_image'),
+	url(r'^ajax/upload_user_image/$', views.upload_user_image, name='upload_user_image'),
+	url(r'^ajax/show_mouldings_for_user_image/$', views.show_mouldings_for_user_image, name='show_mouldings_for_user_image'),
+ 	url(r'^ajax/get_FramedUserImage/$', views.get_FramedUserImage, name='get_FramedUserImage'),
+ 	url(r'^ajax/get_FramedUserImage_by_id/$', views.get_FramedUserImage_by_id, name='get_FramedUserImage_by_id'),
+ 	url(r'^ajax/get_user_item_price/$', views.get_user_item_price, name='get_user_item_price'),
+ 	url(r'^ajax/get_user_item_price_by_cart_item/$', views.get_user_item_price_by_cart_item, name='get_user_item_price_by_cart_item'),
+ 	url(r'^ajax/get_user_image_id/$', views.get_user_image_id, name='get_user_image_id'),
+
 	
+	] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

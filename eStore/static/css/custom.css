@@ -695,5 +695,18 @@ top #phone-help .modal-header h5 {
 .hover-on:hover {
     box-shadow: 7px 12px 13px rgba(0, 0, 0, 0.1);
 }
-  
-  
+
+
+.navbar-nav li > a:not(.btn) {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  padding: 10px 15px;
+  font-size: 0.8 rem;
+  font-weight: 600;
+  color: #fff;
+} 
+
+#all{
+	padding: 0 2rem;
+}

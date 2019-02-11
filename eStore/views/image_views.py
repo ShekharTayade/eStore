@@ -1,4 +1,5 @@
-from eStore.models import Product_image, Moulding_image
+from eStore.models import Product_image, Moulding_image, User_image
+from django.contrib.auth.models import User
 
 from django.http import HttpResponse
 from decimal import Decimal
@@ -101,8 +102,7 @@ def applyBorder(request, img_source, ref_url, border_top, border_right, border_b
 	path = settings.MOULDING_ROOT + ref_url	
 	
 	img_ref = Image.open(path)	
-	#img_ref = Image.open("C:/eCom_Platform/project/eComPlatform/eStore/static/img/moulding/a_apply.jpg")
-
+	
 	box_topleftcorner = (0, 0, slice_left, slice_top)
 
 	topleftcorner = img_ref.crop(box_topleftcorner)
@@ -265,3 +265,175 @@ def get_ImagesWithAllFrames(request, prod_id, user_width):
 			print(traceback.format_exc())
 			
 	return frames_array
+	
+	
+def get_FramedUserImage(request):
+
+	m_id = request.GET.get('moulding_id', '') 
+	mount_color = request.GET.get('mount_color', '') 
+	mount_size = float(request.GET.get('mount_size', '0'))
+	user_width = float(request.GET.get('image_width', '0'))
+
+	# Get the user image
+	session_id = request.session.session_key
+	user = None
+	
+	if request.user.is_authenticated:
+		try:
+			user = User.objects.get(username = request.user)
+			user_image = User_image.objects.filter(user = user, status = "INI").first()
+		except User.DoesNotExist:
+			user = None
+	else:
+		if session_id is None:
+			request.session.create()
+			session_id = request.session.session_key
+		user_image = User_image.objects.filter(session_id = session_id, status = "INI").first()
+	
+	if not user_image:
+		return HttpResponse('')
+	
+	img_source=Image.open(user_image.image_to_frame)
+	
+	# We have to resize the image to base width of 450px. As the user image would be bigger
+	# size and our ratio of onscreen display with mount,frame would be inappropriate visually.
+	basewidth = 1000 
+	wpercent = (basewidth/float(img_source.size[0]))
+	hsize = int((float(img_source.size[1])*float(wpercent)))
+	img_to_frame = img_source.resize((basewidth,hsize), Image.ANTIALIAS)
+
+	# Get moulding
+	moulding = Moulding_image.objects.filter(moulding_id = m_id, image_type = "APPLY").values(
+				'url', 'moulding__width_inches', 'border_slice').first()
+	
+	if moulding:
+	
+		m_width_inch = float(moulding['moulding__width_inches'])
+		
+		# Image width displayed in browser in inches
+		disp_inch = 450//96
+		
+		ratio = disp_inch / user_width
+		
+		border = int(m_width_inch * ratio * 96)
+		
+		border = int(m_width_inch * 450 / user_width)
+		
+		m_size = int(mount_size * 96 * ratio)
+		if m_size > 0 and mount_color != ''and mount_color != 'None':
+
+			img_with_mount = addMount(img_to_frame, mount_color, m_size, m_size, m_size, m_size)
+			
+			framed_img = applyBorder( request, img_with_mount, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+		else:
+			framed_img = applyBorder( request, img_to_frame, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+	else :
+		# No moulding, returing the image as it is.
+		framed_img = Image.new("RGB", (img_source.width, img_source.height), 0)
+		framed_img.paste(img_source, (0,0))		
+	'''
+	response = HttpResponse(content_type="image/png")
+	framed_img.save(response, "PNG")
+	return response
+	#return framed_img
+	'''
+	
+
+	buffered = BytesIO()
+	framed_img.save(buffered, format='JPEG')
+	img_data = buffered.getvalue()
+	img_str = base64.b64encode(img_data)
+
+
+	return HttpResponse(img_str)
+	
+	
+	
+def get_FramedUserImage_by_id(request):
+
+	user_image_id = request.GET.get('user_image_id', '0')
+	m_id = request.GET.get('moulding_id', '') 
+	mount_color = request.GET.get('mount_color', '') 
+	mount_size = float(request.GET.get('mount_size', '0'))
+	user_width = float(request.GET.get('image_width', '0'))
+
+	# Get the user image
+	session_id = request.session.session_key
+	user = None
+	
+	if request.user.is_authenticated:
+		try:
+			user = User.objects.get(username = request.user)
+			user_image = User_image.objects.filter(user = user, id = user_image_id).first()
+		except User.DoesNotExist:
+			user = None
+	else:
+		if session_id is None:
+			request.session.create()
+			session_id = request.session.session_key
+		user_image = User_image.objects.filter(session_id = session_id, id = user_image_id).first()
+	
+	if not user_image:
+		return HttpResponse('')
+	
+	img_source=Image.open(user_image.image_to_frame)
+	
+	# We have to resize the image to base width of 450px. As the user image would be bigger
+	# size and our ratio of onscreen display with mount,frame would be inappropriate visually.
+	basewidth = 1000 
+	wpercent = (basewidth/float(img_source.size[0]))
+	hsize = int((float(img_source.size[1])*float(wpercent)))
+	img_to_frame = img_source.resize((basewidth,hsize), Image.ANTIALIAS)
+
+	# Get moulding
+	moulding = Moulding_image.objects.filter(moulding_id = m_id, image_type = "APPLY").values(
+				'url', 'moulding__width_inches', 'border_slice').first()
+	
+	if moulding:
+	
+		m_width_inch = float(moulding['moulding__width_inches'])
+		
+		# Image width displayed in browser in inches
+		disp_inch = 450//96
+		
+		ratio = disp_inch / user_width
+		
+		border = int(m_width_inch * ratio * 96)
+		
+		border = int(m_width_inch * 450 / user_width)
+		
+		m_size = int(mount_size * 96 * ratio)
+		if m_size > 0 and mount_color != ''and mount_color != 'None':
+
+			img_with_mount = addMount(img_to_frame, mount_color, m_size, m_size, m_size, m_size)
+			
+			framed_img = applyBorder( request, img_with_mount, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+		else:
+			framed_img = applyBorder( request, img_to_frame, moulding['url'], border, border, border, border,
+							float(moulding['border_slice']), float(moulding['border_slice']), 
+							float(moulding['border_slice']), float(moulding['border_slice']) )
+	else :
+		# No moulding, returing the image as it is.
+		framed_img = Image.new("RGB", (img_source.width, img_source.height), 0)
+		framed_img.paste(img_source, (0,0))		
+	'''
+	response = HttpResponse(content_type="image/png")
+	framed_img.save(response, "PNG")
+	return response
+	#return framed_img
+	'''
+	
+
+	buffered = BytesIO()
+	framed_img.save(buffered, format='JPEG')
+	img_data = buffered.getvalue()
+	img_str = base64.b64encode(img_data)
+
+
+	return HttpResponse(img_str)

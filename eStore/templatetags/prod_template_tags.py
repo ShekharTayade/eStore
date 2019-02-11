@@ -93,6 +93,17 @@ def show_trending_categories():
 	return {'trending_categories':trending_cat, 'ecom_site':ecom}	
 
 
+@register.inclusion_tag('eStore/featured_categories.html')
+def show_featured_collections():
+
+	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
+	
+	'''Get trending categories'''
+	featured_cat = Product_category.objects.filter(featured_collection = True)
+	
+	
+	return {'featured_collection':featured_cat, 'ecom_site':ecom}		
+	
 @register.inclusion_tag('eStore/show_frames_section.html')
 def show_frame_my_art(request):
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
@@ -101,3 +112,9 @@ def show_frame_my_art(request):
 	show_frames = Moulding_image.objects.filter(moulding__featured = True, image_type__iexact = "SHOWCASE")
 	
 	return {'show_frames':show_frames, 'ecom_site':ecom}	
+
+@register.inclusion_tag('eStore/show_egift_section.html')
+def show_egift(request):
+	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
+	
+	return {}	

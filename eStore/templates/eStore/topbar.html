@@ -2,7 +2,6 @@
 <!-- Top slim bar with tagline, login, register etc-->
 <div id="top">
 
-	<div class="container">
 		<div class="row" style = "padding:5px 0;">
 			<div class="col-lg-6 mb-3 mb-lg-0 text-white">
 				<a href = "{% url 'index' %}">Home</a>
@@ -12,7 +11,7 @@
 				{% if ecom_site.phone_support_available %}
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<a class = "text-white clickable" data-toggle="modal" data-target="#phone-help">
-						<i class="fa fa-phone"></i>&nbsp;Live Support								
+						<i class="fa fa-phone"></i>&nbsp;Support								
 					</a> 
 					<!--** pick up from DB (Link to Phone number display, if enabled)-->
 				{% endif %}
@@ -178,5 +177,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
 </div>

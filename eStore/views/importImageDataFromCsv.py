@@ -263,7 +263,21 @@ def importImageData(request):
 				'''					'''
 				#get the category id
 				prod_category = Product_category.objects.filter(name__iexact = row[14]).first()
+				if prod_category is None:
 				
+					prod_cat = Product_Category(
+							store = settings.STORE_ID,
+							category_id = row[14],
+							name = row[14],
+							description = '',
+							background_image = '',
+							parent = None,
+							trending = False,
+							url = '',
+							featured_collection = False
+					)
+					prod_cat.save()
+					prod_category = prod_cat
 				
 				prod_prod_cat = Product_product_category.objects.filter(product_id = row[0]).first()
 				if prod_prod_cat :

@@ -7,7 +7,11 @@
 {% load show_main_slider_section from prod_template_tags %}
 {% load show_featured_products_section from prod_template_tags %}
 {% load show_trending_categories from prod_template_tags %}
+{% load show_featured_collections from prod_template_tags %}
 {% load show_collections_section from prod_template_tags %}
+{% load show_egift from prod_template_tags %}
+{% load show_referral from estore_base %}
+{% load client_speak from estore_base %}
 {% load show_frame_my_art from prod_template_tags %}
 {% load site_footer from estore_base %}
 {% load copy_right from estore_base %}
@@ -40,11 +44,11 @@
 		<!-- owl carousel-->
 		<link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.carousel.css' %}">
 		<link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.theme.default.css' %}">
+		<!-- Custom stylesheet -->
+		<link rel="stylesheet" href="{% static  'css/custom.css' %}">
 		<!-- theme stylesheet-->
 		<link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
 
-		<!-- Custom stylesheet - for your changes-->
-		<link rel="stylesheet" href="{% static  'css/custom.css' %}">
 		<!-- Favicon-->
 		<link rel="shortcut icon" href="{% static 'favicon.png' %}">
 
@@ -121,6 +125,14 @@
 				</div> -->
 				
 				{% show_frame_my_art request %}
+
+				{% show_featured_collections %}
+			
+				{% show_egift request %}
+				
+				{% show_referral %}
+
+				{% client_speak request %}
 
 				{% endblock sitecontent %}
 

@@ -94,6 +94,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 				# `allauth` needs this from django
                 'django.template.context_processors.request',
+				'django.template.context_processors.media',
             ],
         },
     },
@@ -248,7 +249,12 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 DEFAULT_FROM_EMAIL = ''
 EMAIL_SUBJECT_PREFIX = ''
 
-MEDIA_URL = '/media/'
+MEDIA_URL = ('/media/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
 MOULDING_ROOT = os.path.join(BASE_DIR, 'eStore/static/img/')
+
+	
+print(MEDIA_URL)
+print(MEDIA_ROOT)
