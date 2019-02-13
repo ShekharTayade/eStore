@@ -114,17 +114,15 @@ def upload_user_image(request):
 			for tag, value in exif_data.items():
 				decodedTag = ExifTags.TAGS.get(tag, tag)
 				exifData[decodedTag] = value		
-				
-			print('Orientation')
-			print(exifData['Orientation'])
 		
 			if exifData :
-				if exifData['Orientation'] == 6:
-					im.rotate(90)
-				if exifData['Orientation'] == 3:
-					im.rotate(180)
-				if exifData['Orientation'] == 8:
-					im.rotate(270)
+				if 'Orientation' in exifData:
+					if exifData['Orientation'] == 6:
+						im.rotate(90)
+					if exifData['Orientation'] == 3:
+						im.rotate(180)
+					if exifData['Orientation'] == 8:
+						im.rotate(270)
 			
 		buffered = BytesIO()
 		im.save(buffered, format='JPEG')
@@ -552,3 +550,30 @@ def get_user_item_price_by_cart_item (cart_item_id):
 				'percent_disc':percent_disc, 'item_unit_price':item_price_withoutdisc,
 				'disc_amt':disc_amt, 'disc_applied':disc_applied, 'promotion_id':promotion_id})
 	
+	
+def validateUserImageSize(request):
+
+	if request.user.is_authenticated:
+		try:
+			user = User.objects.get(username = request.user)
+			user_instance = User_image.objects.filter(user = user, status = "INI").first()
+		except User.DoesNotExist:
+			user = None
+	else:
+		if session_id is None:
+			request.session.create()
+			session_id = request.session.session_key
+		user_instance = User_image.objects.filter(session_id = session_id, status = "INI").first()
+		
+	if user_instance is None:
+		return ({})
+	
+	ppi = 300
+		
+	width = user_instance.image_to_frame.width
+	height = user_instance.image_to_frame.height
+	
+	max_width = math.floor(width / ppi)
+	max_height = math.floor(height / ppi)
+
+	return ({'max_height':max_height, 'max_width': max_width} )

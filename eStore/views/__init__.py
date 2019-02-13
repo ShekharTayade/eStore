@@ -11,3 +11,4 @@ from .tax_views import *
 from .promotion_views import *
 from .profile_group_views import *
 from .user_image_views import *
+from .wishlist_views import *

@@ -60,6 +60,10 @@ urlpatterns = [
 	url(r'^ajax/get_addr_pin_city_state/$', views.get_addr_pin_city_state, name='get_addr_pin_city_state'),
 	url(r'^ajax/validate_address/$', views.validate_address, name='validate_address'),
 
+	url(r'^ajax/add_to_wishlist/$', views.add_to_wishlist, name='add_to_wishlist'),
+    url(r'^show_wishlist/$', views.show_wishlist, name='show_wishlist'),
+	url(r'^ajax/delete_wishlist_item/$', views.delete_wishlist_item, name='delete_wishlist_item'),
+	
 
  
     url(r'^show_cart/$', views.show_cart, name='show_cart'),
@@ -103,6 +107,8 @@ urlpatterns = [
  	url(r'^ajax/get_user_item_price_by_cart_item/$', views.get_user_item_price_by_cart_item, name='get_user_item_price_by_cart_item'),
  	url(r'^ajax/get_user_image_id/$', views.get_user_image_id, name='get_user_image_id'),
 
+	url(r'^product_search/$', views.products_by_keywords, name='products_by_keywords'),	
+	
 	
 	] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

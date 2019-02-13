@@ -7,27 +7,27 @@
 				  <nav aria-label="breadcrumb">
 					<ol class="breadcrumb">
 						<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-						<li aria-current="page" class="breadcrumb-item active">Shopping cart</li>
+						<li aria-current="page" class="breadcrumb-item active">Wishlist</li>
 					</ol>
 				  </nav>
 				</div>
 
 
-				<div id="cart" class="col-lg-8">
+				<div id="wishlist" class="col-lg-8">
 					<div class="box">
 						<form method="post" id = "checkoutform" onsubmit = "return validate_checkout();" action="{% url 'checkout_step1_address' %}">
 							{% csrf_token %}
-							<!-- Invisible field to hold the cart id -->
-							<input hidden id = "cart_id" name = "cart_id" value = "{{usercart.cart_id }}">
+							<!-- Invisible field to hold the wishlist id -->
+							<input hidden id = "wishlist_id" name = "wishlist_id" value = "{{userwishlist.wishlist_id }}">
 							<!-- Hidden fields for sub_total and tax -->
-							<input hidden id = "sub_total" name = "sub_total" value = "{{usercart.cart_sub_total|floatformat}}">
-							<input hidden id = "tax" name = "tax" value = "{{usercart.cart_tax|floatformat}}">
-							<input hidden id = "disc_amt_nv" name = "disc_amt_nv" value = "{{usercart.cart_disc_amt|floatformat}}">
-							<input hidden id = "cart_total_nv" name = "cart_total_nv" value = "{{usercart.cart_total|floatformat}}">
-							<h1>Shopping cart</h1>
-							<p class="text-muted">You currently have {% if usercart %} {{usercart.quantity}} {% else %} 0 {% endif %} item(s) in your cart.</p>
+							<input hidden id = "sub_total" name = "sub_total" value = "{{userwishlist.wishlist_sub_total|floatformat}}">
+							<input hidden id = "tax" name = "tax" value = "{{userwishlist.wishlist_tax|floatformat}}">
+							<input hidden id = "disc_amt_nv" name = "disc_amt_nv" value = "{{userwishlist.wishlist_disc_amt|floatformat}}">
+							<input hidden id = "wishlist_total_nv" name = "wishlist_total_nv" value = "{{userwishlist.wishlist_total|floatformat}}">
+							<h1>Your Wishlist</h1>
+							<p class="text-muted">You currently have {% if userwishlist %} {{userwishlist.quantity}} {% else %} 0 {% endif %} item(s) in your wish list.</p>
 							<div class="table table-responsive">
-								<table id = "cartTbl" class="table table-responsive">
+								<table id = "wishlistTbl" class="table table-responsive">
 									<thead>
 										<tr>
 											<th width="15%">Name</th>
@@ -40,7 +40,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{% for i in usercartitems %}
+										{% for i in userwishlistitems %}
 										<tr>
 											<td><img src = "{{i.product__product_image__url}}" style = "width:75px; height:75px; object-fit:contain;">
 												<br />
@@ -74,8 +74,8 @@
 												{% endwith %}
 											</td>
 											<td style = "text-align:right">
-												<input type="number" value="{{i.quantity}}" class="form-control"
-													onchange = 'updateItemQty("{{i.cart_item_id}}", $(this).val());'>
+												<input readonly type="number" value="{{i.quantity}}" class="form-control"
+													onchange = 'updateItemQty("{{i.wishlist_item_id}}", $(this).val());'>
 											</td>
 											<td>{{i.item_unit_price}}</td>
 											<td style = "text-align:right">
@@ -88,17 +88,17 @@
 											</td>
 											<td style = "text-align:right">{{i.item_total|floatformat}}</td>
 											<td>
-												<a data-toggle="tooltip" title="Change!" href="{% url 'product_details' i.product_id %}?cart_item_id={{i.cart_item_id}}" >
+												<a data-toggle="tooltip" title="Move to Cart!" href="{% url 'product_details' i.product_id %}?wishlist_item_id={{i.wishlist_item_id}}" >
 													<i class= "fa fa-edit"></i>
 												</a>
-												<a style = "cursor: pointer; color:red;" data-toggle="tooltip" title="Remove!" 
-													onclick="deleteItem('{{i.cart_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{usercart.cart_total|floatformat}}', '{{i.item_total|floatformat}}');">
+												<a data-toggle="tooltip" title="Remove!" style = "cursor: pointer; color:red;"
+													onclick="deleteItem('{{i.wishlist_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{userwishlist.wishlist_total|floatformat}}', '{{i.item_total|floatformat}}');">
 													
 													<i class="fa fa-trash-o"></i>
 												</a>
 											</td>
 										</tr>
-										{% endfor usercartitems %}
+										{% endfor userwishlistitems %}
 										
 										
 										{% for i in user_image %}
@@ -134,7 +134,7 @@
 											</td>
 											<td style = "text-align:right">
 												<input type="number" value="{{i.quantity}}" class="form-control"
-													onchange = 'updateItemQty("{{i.cart_item_id}}", $(this).val());'>
+													onchange = 'updateItemQty("{{i.wishlist_item_id}}", $(this).val());'>
 											</td>
 											<td>{{i.item_unit_price}}</td>
 											<td style = "text-align:right">
@@ -147,11 +147,11 @@
 											</td>
 											<td style = "text-align:right">{{i.item_total|floatformat}}</td>
 											<td>
-												<a data-toggle="tooltip" title="Change!" href="{% url 'user_image' %}?cart_item_id={{i.cart_item_id}}" >
-													<i class= "fa fa-edit"></i>
+												<a data-toggle="tooltip" title="Move to Cart!" href="{% url 'user_image' %}?wishlist_item_id={{i.wishlist_item_id}}" >
+													<i class= "fa fa-cart-plus fa-lg"></i>
 												</a>
-												<a style = "cursor: pointer; color:red;" data-toggle="tooltip" title="Remove!"
-													onclick="deleteItem('{{i.cart_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{usercart.cart_total|floatformat}}', '{{i.item_total|floatformat}}');">
+												<a data-toggle="tooltip" title="Remove!" style = "cursor: pointer; color:red;"
+													onclick="deleteItem('{{i.wishlist_item_id}}', '{{sub_total|floatformat}}', '{{total_tax|floatformat}}', '{{userwishlist.wishlist_total|floatformat}}', '{{i.item_total|floatformat}}');">
 													
 													<i class="fa fa-trash-o"></i>
 												</a>
@@ -171,13 +171,13 @@
 							</div>
 
 							<!--convert python data to json -->
-							{% for j in usercartitems %}
-								{{ j|json_script:j.cart_item_id }}			
-							{% endfor usercartitems %}
+							{% for j in userwishlistitems %}
+								{{ j|json_script:j.wishlist_item_id }}			
+							{% endfor userwishlistitems %}
 							
 							<!--convert python data to json -->
 							{% for j in user_image %}
-								{{ j|json_script:j.cart_item_id }}			
+								{{ j|json_script:j.wishlist_item_id }}			
 							{% endfor user_image %}
 
 							<!-- /.table-responsive-->
@@ -192,7 +192,7 @@
 										class="btn btn-primary" 
 										form = "checkoutform" 
 										value="submit">
-											Proceed to checkout <i class="fa fa-chevron-right"></i>
+											Move All to Cart <i class="fa fa-chevron-right"></i>
 									</button>
 								</div>
 							</div>
@@ -207,68 +207,40 @@
 				<div class="col-lg-4">
 					<div id="order-summary" class="box">
 						<div class="box-header">
-							<h3 class="mb-0">Cart summary</h3>
+							<h3 class="mb-0">Wishlist summary</h3>
 						</div>
 						<div class="table-responsive">
 							<table class="table">
 								<tbody>
 									<tr>
-										<td>Cart subtotal</td>
-										<th class="pull-right">{{usercart.cart_sub_total|floatformat}}</th>
+										<td>Wishlist subtotal</td>
+										<th class="pull-right">{{userwishlist.wishlist_sub_total|floatformat}}</th>
 									</tr>
 									<tr>
 										<td>Tax</td>
-										<th class="pull-right">{{usercart.cart_tax|floatformat}}</th>
+										<th class="pull-right">{{userwishlist.wishlist_tax|floatformat}}</th>
 									</tr>
 
 								
-									<tr>
-										<td>Shipping & handling</td>
-										<th><span class="pull-right">{{shipping_cost}}</span></th>
-									</tr>
 									<tr class="total">
 										<td>Total</td>
-										<th class="pull-right"><i class = "fa fa-inr"> </i> <span id ="cart_total" >{{usercart.cart_total|floatformat|default:"0"}}</span></th>
+										<th class="pull-right"><i class = "fa fa-inr"> </i> <span id ="wishlist_total" >{{userwishlist.wishlist_total|floatformat|default:"0"}}</span></th>
 									</tr>
 
 									<tr>
 										<td>Discount</td>
 										<th id = "disc_amt" style = "color:green" class="pull-right">
-											{{usercart.cart_disc_amt|floatformat}}
+											{{userwishlist.wishlist_disc_amt|floatformat}}
 										</th>
 										 
-									</tr>									</tbody>
+									</tr>									
+								</tbody>
 							</table>
-							{% if usercart.voucher %} 
-								<div id "vouch_text" style ="color: #999; font-size: 0.6rem; text-align:right">
-									(You have used voucher {{ usercart.voucher.voucher_code }}. 
-									Discount of <i class = "fa fa-inr"></i> {{usercart.voucher_disc_amount |floatformat }} is applied)
-								</div>
-							{% endif %}
 						</div>
 					</div>
 										
-					<div class="box">
-						<div class="box-header">
-							<h4 class="mb-0">Coupan/eGift code</h4>
-						</div>
-						<p class="text-muted">If you have a coupon/eGift code, please enter it in the box below.</p>
-						<form>
-							<div class="input-group">
-								<input id = "v_code" type="text" class="form-control"><span class="input-group-append">
-								<button onclick = "applyVoucher( '{{usercart.cart_id}}', $('#v_code').val(),'{{usercart.cart_total}}');" type="button" class="btn btn-primary"><i class="fa fa-gift"></i></button></span>
-							</div>
-							<div id="coupan-text"></div>
-							<!-- /input-group-->
-						</form>
-						<div style = "color:red" id="voucher-msg"></div>
-					</div>
+
 				</div>
 				<!-- /.col-md-4-->
 
 			</div>
-
-			<script>
-				//update the display with number of cart items in the menu bar
-				updateCartItemsNum("{{usercart.quantity}}");
-			</script>

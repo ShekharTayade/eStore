@@ -32,14 +32,13 @@
 								<div class = "row">
 										<div class = "col-md-12">
 											{% csrf_token %}
-											{% if user_instance.image_to_frame %}TRUE {% else %} FALSE {% endif %}
 											<div id = "size-title">
 												<span id = "prod-name">Upload Image</span><br />
 											</div>
 											<span id = "artist"> Click browse button to select an image you want to frame</span>
 											<form id = "img-form" method = "post" class="form-horizontal" enctype='multipart/form-data'>										
 												<p>
-												<input name="image_to_frame" class="form-control" id="user_image" type="file" accept="image/*">
+												<input name="image_to_frame" class="form-control" id="user_image" type="file" accept="image/*" required>
 												<input hidden name="user_id" class="form-control" id="user_id" value = "{{request.user}}">
 												</p>
 												<p>
@@ -102,6 +101,7 @@
 									</div>
 								</div>
 								<div class = "fine-print"> There may be tiny variation in delivered sizes due to aspect ratio and other factors</div>
+								<p style = "background-color:#ccc; margin-top:10px;"><span id = "size_validation"></span></p>
 							</div>
 
 							<p>
@@ -123,7 +123,11 @@
 								</div>
 							</div>
 							</p>
-							<p class="text-center buttons"><button class="btn btn-primary" onclick="addProdToCart(1)"><i class="fa fa-shopping-cart"></i>Add to cart</button><a href="#" class="btn btn-outline-primary"><i class="fa fa-heart"></i> Add to wishlist</a></p>
+							<p class="text-center buttons">
+								<button class="btn btn-primary" onclick="addProdToCart(1)"><i class="fa fa-shopping-cart"></i>Add to cart</button>
+								<button class="btn btn-outline-primary" onclick="addProdToWishlist(1)"><i class="fa fa-shopping-cart"></i>Add to wishlist</button>
+								<!--<a href="#" class="btn btn-outline-primary"><i class="fa fa-heart"></i> Add to wishlist</a>-->
+							</p>
 							<!-- <p class="text-center buttons"><a href="#" class="btn btn-primary"><i class="fa fa-picture-o"></i> Add Frame to This </a></p> <div class ="text-center"><a href="#" >How does it work?</a></div> -->
 						</div>
 		
@@ -154,7 +158,7 @@
 					<div class="col-sm-12">
 						<span class = "pull-left" id = "frame-name">Select Mount</span>
 						<div class = "pull-right">
-							<button onclick = "set_mount_color(''); set_mount_id('')" class = "btn btn-outline-secondary"><i class="fa fa-remove"></i>Remove</button>
+							<button onclick = " set_mount_id('0'); set_mount_color('');" class = "btn btn-outline-secondary"><i class="fa fa-remove"></i>Remove</button>
 						</div>
 					</div>
 				</div>
@@ -195,6 +199,7 @@
 
 
 			{% include 'eStore/cart-add-message.html' %}
+			{% include 'eStore/wishlist-add-message.html' %}
 			{% include 'eStore/loader-message.html' %}
 
 		</div>
@@ -217,6 +222,7 @@
 		var acrylic_id = '0';
 		var stretch_id = '0'; 
 		var user_image_id = '0';
+		var ppi = 300;  // Print standard
 		
 		function set_user_image_id(){
 
@@ -528,7 +534,66 @@
 		}	
 		
 		
-		
+		// ---- Add Product to Cart ----//
+		function addProdToWishlist(qty) {
+			var cart_qty;
+			var total_price = $("#item_total_price_nv").html();
+			var discount = $("#disc").html();
+			var promotion_id = $("#promotion_id_nv").html();
+			var disc_amt = $("#disc_amt_nv").html();
+			var item_unit_price = $("#item_unit_price_nv").html();
+	
+			set_user_image_id();
+			
+			//var currwidth = parseFloat($("#size-slider").slider("value"));
+			//var currheight = Math.round(currwidth / ratio);
+			var img = document.getElementById('prod-img');
+			var width = img.naturalWidth;
+			var height = img.naturalHeight;
+			var ratio = width/height;		
+			var img = document.getElementById('prod-img');
+			var currwidth = parseFloat($("#size-slider").slider("value"));
+			var currheight = Math.round(currwidth / ratio);
+			var sqin = currwidth * currheight;
+			
+			print_medium_id = $('#print-medium-select').val();
+			print_medium_size = sqin;
+			moulding_size = (currwidth + currheight) * 2;
+			acrylic_size = currwidth * currheight;
+			board_size = currwidth * currheight;
+			stretch_size = (currwidth + currheight) * 2;
+			
+			// Update the cart
+			$.ajax({
+				url: "{% url 'add_to_wishlist' %}", 
+				data: {'user_image_id':user_image_id, 'qty':qty, 'moulding_id': moulding_id,
+						'width':currwidth, 'height':currheight,
+						'moulding_size' : moulding_size,
+						'print_medium_id':print_medium_id, 'print_medium_size':print_medium_size, 
+						'mount_id':mount_id, 'mount_size':mount_size,
+						'mount_w_left' : mount_w_left, 'mount_w_right':mount_w_right, 
+						'mount_w_top':mount_w_top, 'mount_w_bottom' : mount_w_bottom, 
+						'acrylic_id':acrylic_id, 'acrylic_size':acrylic_size,
+						'board_id':board_id, 'board_size':board_size, 'stretch_id':stretch_id,
+						'stretch_size':stretch_size, 
+						'total_price':total_price, 'image_width':currwidth, 'image_height':currheight,
+						'discount':discount, 'promotion_id':promotion_id, 'disc_amt':disc_amt,
+						'item_unit_price':item_unit_price}, 
+				dataType: 'text', 
+					type: 'POST',
+				success: function (data) {
+					data = JSON.parse(data);
+					cart_qty = data.cart_qty;
+					//Update items in cart
+					$('#msg-wishlist-modal').modal('show');
+				},
+				error: function(xhr){
+					alert("An error occured: " + xhr.status + " " + xhr.statusText); 
+				}
+			});
+
+		}	
+				
 		
 		//
 		jQuery(document).ready(function(){
@@ -543,7 +608,7 @@
 			var maxsize = 60;
 			var ratio = 1;
 			$("#size-slider").slider({
-				value:minsize,
+				value:16,
 				min:minsize,
 				max:maxsize,
 				step:1,
@@ -572,7 +637,7 @@
 				set_size_slider();	
 				set_user_image_id('{{ user_instance.id }}');
 			{% endif %}	
-			$("#size-slider").slider( "value", 16 );
+
 
 			// Set default print medium
 			set_print_medium('PAPER');
@@ -581,20 +646,25 @@
 		
 
 		function set_size_slider() {
-			// Size Slider
-			var minsize = 4;
-			var maxsize = 60;
-			// 
+
 			var img = document.getElementById('prod-img');
 			var width = img.naturalWidth;
 			var height = img.naturalHeight;
 			var ratio = width/height;
+			var max_width = Math.floor(width / ppi);
+			var max_height = Math.floor(height / ppi);
+			
+			$("#size-slider").slider( "destroy" );
+			
 			$("#size-slider").slider({
-				value:minsize,
-				min:minsize,
-				max:maxsize,
+				classes: {
+					"ui-slider": "ui-corner-all"
+				},
+				value:max_width,
+				min:4,
+				max:max_width,
 				step:1,
-				change:function(event, ui){
+				slide:function(event, ui){
 					var img = document.getElementById('prod-img');
 					var width = img.naturalWidth;
 					var height = img.naturalHeight;
@@ -602,8 +672,20 @@
 
 					var currwidth = ui.value;
 					var currheight = Math.round(currwidth / ratio);
-					$("#size").html("Width: " + currwidth + ", Height: " + currheight);
 				
+
+					if (currwidth > max_width) {
+						$("#size_validation").html("With this image, the best quality printing can be done up to size of width: " + max_width + " inch, height: " + max_height + " inch");
+						$("#size").html("Width: " + max_width + ", Height: " + max_height);
+						event.preventDefault();
+						$("#size-slider").slider( "value", max_width );
+						return false;
+					} else {
+						$("#size_validation").html("");
+					}				
+
+					$("#size").html("Width: " + currwidth + ", Height: " + currheight);
+					
 					// Apply the moulding and mount when the size changes
 					print_medium_id = $('#print-medium-select').val();
 					if (print_medium_id == "PAPER") {
@@ -611,10 +693,14 @@
 							set_moulding(moulding_id);
 						}
 					}
+				},
+				stop:function(event, ui){
 					calc_total_price();
 				}
+				
 			});
-			$("#size-slider").slider( "value", 16 );
+			$("#size").html("Width: " + max_width + ", Height: " + max_height);
+
 		}
 		function startMagnify(){
 			magnify("prod-img", 3);			
@@ -685,6 +771,9 @@
 			var formData = new FormData();
 			formData.append('file', file);
 
+			document.getElementById("prod-img").style.objectFit ="none";
+			document.getElementById("prod-img").src ="{% static 'img/ajax-loader.gif' %}";
+			
 			$.ajax({
 				url: '{% url "upload_user_image" %}', 
 				data:formData,
@@ -692,7 +781,23 @@
 				contentType: false,
 				type: 'post',				
 				success: function (data) {
+					document.getElementById("prod-img").style.objectFit ="contain";
 					document.getElementById("prod-img").src = "data:image/png;base64," + data;
+					setTimeout(function (){}, 500);
+					// Validate print size
+					var img = document.getElementById('prod-img');
+					var width = img.naturalWidth;
+					var height = img.naturalHeight;
+					var max_width = Math.floor(width / ppi);
+					var max_height = Math.floor(height / ppi);
+					var currwidth = $("#size-slider").slider("value");
+
+					if (currwidth > max_width) {
+						$("#size_validation").html("With this image, the best quality printing can be done up to size of width: " + max_width + " inch, height: " + max_height + " inch");
+					} else {
+						$("#size_validation").html("");
+					}
+					
 					set_user_image_id();
 					set_size_slider();
 					get_applicable_frames();

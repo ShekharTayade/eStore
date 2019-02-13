@@ -75,7 +75,7 @@
 				<li><a href="{% url 'user_image' %}">Frame My Art</a></li>
 				<li><a href="">Sale</a></li>
 				<li><a href="">For Business</a></li>
-				<li><a href="">Wish List</a></li>
+				<li><a href="{% url 'show_wishlist' %}">Wish List</a></li>
 				<!--<li class="nav-item menu-large">
 					<a href="" data-toggle="dropdown" data-hover="dropdown" data-delay="200" class="dropdown-toggle nav-link">
 						Sale<b class="caret"></b>
@@ -110,11 +110,11 @@
 <!-- Search open up -->
 <div id="search" class="collapse">
 	<div class="container">
-		<form role="search" class="ml-auto">
+		<form role="search" class="ml-auto" action = "{% url 'products_by_keywords' %}">
 			<div class="input-group">
-				<input type="text" placeholder="Search" class="form-control">
+				<input type="text" placeholder="Ex. Blue Abstract Landscape" name="keywords" class="form-control" required>
 				<div class="input-group-append">
-					<button type="button" class="btn btn-primary"><i class="fa fa-search"></i></button>
+					<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
 				</div>
 			</div>
 		</form>

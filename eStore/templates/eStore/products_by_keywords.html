@@ -10,8 +10,7 @@
 					<nav aria-label="breadcrumb">
 						<ol class="breadcrumb">
 							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-							<li class="breadcrumb-item"><a href= "{% url 'show_all_categories' %}">Categories</a></li>
-							<li aria-current="page" class="breadcrumb-item active">{{product_category.name}}</li>
+							<li aria-current="page" class="breadcrumb-item active">Search</li>
 						</ol>
 					</nav>
 				</div>
@@ -131,8 +130,8 @@
 
 				<div class="col-lg-9">
 					<div class="box-cat">
-						<h1>{{ product_category.name }}</h1>
-						<p>{% if product_category.description %} {{product_category.description}} {% endif %}</p>
+						<h1>Search Results</h1>
+						<p>{% if keywords %} You Searched for: "{{keywords}}" {% endif %}</p>
 					 </div>
 					 
 					<!-- Category header -->
@@ -173,29 +172,6 @@
 	{% block jscripts %}
 
 	<script>
-		// ---- Add Product to Cart ----//
-		function addProdToCart(prod_id, qty) {
-			var cart_qty;
-			// Update the cart
-			$.ajax({
-					url: "{% url 'add_to_cart' %}", 
-					data: {'prod_id':prod_id, 'qty':qty}, 
-					dataType: 'text', 
-				success: function (data) {
-					data = JSON.parse(data);
-					cart_qty = data.cart_qty;
-					
-					//Update items in cart
-					$("#itemsincart").html(cart_qty + " items in cart"); 
-					$('#msg-modal').modal('show');
-
-				},
-				error: function(xhr){
-					alert("An error occured: " + xhr.status + " " + xhr.statusText); 
-				}
-			});
-			
-		}
 
 		// Clear the filers
 		function clearFilter(ele_chx){
@@ -237,10 +213,9 @@
 			}
 			
 			filter = filter + '}';
-			console.log(filter)
 
 			
-			$.ajax({url: '{% url "category_products" product_category.category_id %}', 
+			$.ajax({url: '{% url "products_by_keywords" %}', 
 				data: filter, 
 				dataType: 'text', 
 				type: 'POST',

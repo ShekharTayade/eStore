@@ -442,7 +442,7 @@ class Product_variant(models.Model):
 class Product_attribute(models.Model):
 	product = models.ForeignKey(Product, models.CASCADE)
 	name = models.CharField(max_length = 128, null=False)
-	value = models.CharField(max_length = 128, null=False)
+	value = models.CharField(max_length = 2000, null=False)
 	display_as_filter = models.NullBooleanField(null=True)  # in products details pages, left side Filters
 
 	class Meta:
@@ -888,4 +888,53 @@ def rotate_image(filepath):
   except (AttributeError, KeyError, IndexError):
     # cases: image don't have getexif
     pass		
+
+
+
+
+class Wishlist(models.Model):
+	wishlist_id = models.AutoField(primary_key=True, null=False)
+	store = models.ForeignKey(Ecom_site, models.PROTECT)
+	session_id = models.CharField(max_length = 40, blank=True, default='') # to store the session_key in case of anonymous user
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+	voucher = models.ForeignKey(Voucher, models.PROTECT, null=True)
+	voucher_disc_amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	quantity = models.IntegerField(null=True)
+	wishlist_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	wishlist_disc_amt  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	wishlist_tax  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	wishlist_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	updated_date =  models.DateField(blank=True, null=True)
+	wishlist_status = models.CharField(max_length = 2, blank=True, default='AC') #"AC" Active, "AB":Abandoned, "MV" Moved-out to Cart
 	
+class Wishlist_item(models.Model):
+	wishlist_item_id = models.AutoField(primary_key=True, null=False)
+	wishlist = models.ForeignKey(Wishlist,on_delete=models.PROTECT, null=False)
+	product = models.ForeignKey(Product,on_delete=models.PROTECT, null=True)
+	user_image = models.ForeignKey(User_image,on_delete=models.PROTECT, null=True)
+	promotion = models.ForeignKey(Promotion, models.PROTECT, null=True)
+	frame_promotion = models.ForeignKey(Frame_promotion, models.PROTECT, null=True)
+	quantity = models.IntegerField(null=False)
+	item_unit_price = models.DecimalField(max_digits=12, decimal_places=2, null=False, default=0)
+	item_sub_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_disc_amt  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_tax  = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	item_total = models.DecimalField(max_digits=12, decimal_places=2,  null=False, default=0)
+	moulding = models.ForeignKey(Moulding,on_delete=models.PROTECT, null=True)
+	moulding_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	print_medium = models.ForeignKey(Print_medium, models.PROTECT, null=False, default='PAPER')
+	print_medium_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	mount = models.ForeignKey(Mount, models.PROTECT, null=True)
+	mount_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	board = models.ForeignKey(Board, models.PROTECT, null=True)
+	board_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	acrylic = models.ForeignKey(Acrylic, models.PROTECT, null=True)
+	acrylic_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	stretch = models.ForeignKey(Stretch, models.PROTECT, null=True)
+	stretch_size = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+	image_width = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)
+	image_height = models.DecimalField(max_digits=3, decimal_places=0, blank=False, null=False)	
+	updated_date =  models.DateField(blank=True, null=True)
+
+	class Meta:
+		unique_together = ("wishlist_item_id", "wishlist")	

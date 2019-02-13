@@ -425,7 +425,7 @@ def add_to_cart(request):
 				)
 			elif user_image:
 				usercartitems = Cart_item(
-					cart = usercart,
+					cart = newusercart,
 					product_id = prod_id,
 					user_image = user_image,
 					promotion = p_promotion,

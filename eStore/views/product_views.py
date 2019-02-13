@@ -176,22 +176,43 @@ def category_products(request, cat_id):
 		
 		major_array = []
 		sub_array = []
+		size_key = None
+		size_val = None
+		width = 0
 		for majorkey, subdict in json_data.items():
-			#print (majorkey)
+
 			for subkey, value in subdict.items():
-				
+				if majorkey == 'SIZE':
+					# Get the size
+					idx = subkey.find("_")
+					width = int(subkey[:idx])
+					height = int(subkey[(idx+1):])
+					ratio = width/height
+					size_key = "MAX-WIDTH"
+					
+					continue				
+
 				if value.upper().strip() == "TRUE":
 					print ( "Apply - " + majorkey + " : " + subkey)
 					major_array.append(majorkey)
 					sub_array.append(subkey) 
 				
 		products = Product.objects.filter(product_id__in = category_prods)
-		
+
 		if major_array :
 			products = products.filter(product_attribute__name__in = major_array)
 			if sub_array :
 				products = products.filter(product_attribute__value__in = sub_array)		
+		
+		if size_key:
+			if width:
+				products = products.filter(product_attribute__name = size_key, 
+					product_attribute__value__gte = width)
+				if ratio :
+					products = products.filter(product_attribute__name = 'ASPECT-RATIO', 
+						product_attribute__value = ratio)
 
+					
 	prod_images	= Product_image.objects.filter(product_id__in = category_prods, image_type = 'FRONT').order_by('product_id')
 
 	
@@ -355,14 +376,32 @@ def show_collection(request, coll_id):
 
 def show_categories(request):
 
+	sortOrder = request.GET.get("sort")
+	show = request.GET.get("show")
+
 	# Get all the categories along with count of images in each
-	categories = Product_category.objects.annotate(Count(
+	categories_list = Product_category.objects.annotate(Count(
 		'product_product_category')).filter(
 		product_product_category__count__gt = 0).order_by('-product_product_category__count')
 	#values('product_category_id',
 	#	'product_category__name', 'product_category__url'
+
+	if show == None or show == '50':
+		perpage = 50 #default
+		show = '50'
+	else:
+		if show == '100':
+			perpage = 100
+		else:
+			if show == 'ALL':
+				perpage = 999999
+				
+	paginator = Paginator(categories_list, perpage) 
+	page = request.GET.get('page')
+	categories = paginator.get_page(page)
 	
-	return render(request, "eStore/show_all_categories.html", {'categories':categories})
+	return render(request, "eStore/show_all_categories.html", {'categories':categories,
+	'sortOrder':sortOrder, 'show':show})
 
 	
 	
@@ -721,4 +760,109 @@ def get_product_promotion(prod_id):
 		
 	return ({'promotion_id':promo_id, 'cash_disc':cash_disc, 'percent_disc':percent_disc})
 
+@csrf_exempt	
+def products_by_keywords(request):
+		
+	keywords = request.GET.get('keywords', '').split()		
+	sortOrder = request.GET.get("sort")
+	show = request.GET.get("show")
+
+	prod_categories = Product_category.objects.filter(store_id=settings.STORE_ID, trending = True )
+
+	products = Product_attribute.objects.all().select_related('product')
+
+	for word in keywords:
+		products = products.filter(name = 'KEY-WORDS', 
+			value__icontains = word)
+			
+	if request.is_ajax():
+		#Apply the user selected filters -
+
+		# Get data from the request.
+		json_data = json.loads(request.body.decode("utf-8"))
+		
+		major_array = []
+		sub_array = []
+		size_key = None
+		size_val = None
+		width = 0
+		for majorkey, subdict in json_data.items():
+
+			for subkey, value in subdict.items():
+				if majorkey == 'SIZE':
+					# Get the size
+					idx = subkey.find("_")
+					width = int(subkey[:idx])
+					height = int(subkey[(idx+1):])
+					ratio = width/height
+					size_key = "MAX-WIDTH"
+					
+					continue				
+
+				if value.upper().strip() == "TRUE":
+					print ( "Apply - " + majorkey + " : " + subkey)
+					major_array.append(majorkey)
+					sub_array.append(subkey) 
+
+		if major_array :
+			products = products.filter(name__in = major_array)
+			if sub_array :
+				products = products.filter(value__in = sub_array)		
+		
+		if size_key:
+			if width:
+				products = products.filter(name = size_key, 
+					value__gte = width)
+				if ratio :
+					products = products.filter(name = 'ASPECT-RATIO', 
+						value = ratio)
+
+	prods = products.values('product_id')
+					
+	prod_images	= Product_image.objects.filter(product_id__in = prods, image_type = 'FRONT').order_by('product_id')
 	
+	# Let's create the final results 
+	prods_by_category = []
+	for p in products:
+
+		rec = {}
+		prod_img = ""
+		for i in prod_images:
+			if p.product_id == i.product_id:
+				prod_img = i.url
+		rec['product_id'] = p.product_id
+		rec['name'] = p.product.name
+		rec['desription'] = p.product.description
+		rec['price'] = p.product.price
+		rec['url'] = prod_img
+		prods_by_category.append(rec)	
+		
+
+	prod_filters = ['ORIENTATION', 'ARTIST', 'IMAGE-TYPE']
+	prod_filter_values = Product_attribute.objects.filter(product_id__in = prods).values(
+	'name', 'value').distinct().order_by('value')
+
+
+	if show == None or show == '50':
+		perpage = 50 #default
+		show = '50'
+	else:
+		if show == '100':
+			perpage = 100
+		else:
+			if show == 'ALL':
+				perpage = 999999
+				
+	paginator = Paginator(prods_by_category, perpage) 
+	page = request.GET.get('page')
+	prods = paginator.get_page(page)
+
+	if request.is_ajax():
+
+		template = "eStore/prod_display_include.html"
+	else :
+		template = "eStore/products_by_keywords.html"
+
+	return render(request, template, {'prod_categories':prod_categories, 
+		'products':products, 'prods':prods, 'sortOrder':sortOrder, 'show':show, 'prod_filters':prod_filters,
+		'prod_filter_values':prod_filter_values, 'keywords':keywords} )

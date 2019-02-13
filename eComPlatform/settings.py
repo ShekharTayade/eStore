@@ -254,7 +254,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 MOULDING_ROOT = os.path.join(BASE_DIR, 'eStore/static/img/')
-
-	
-print(MEDIA_URL)
-print(MEDIA_ROOT)

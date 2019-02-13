@@ -1,4 +1,4 @@
-from eStore.models import Product, Product_type, Tax, Product_attribute, Product_image
+from eStore.models import Product, Product_type, Tax, Product_attribute, Product_image, Product_category
 from eStore.models import Product_category, Product_product_category, Ecom_site, Publisher_price, Publisher
 import csv
 
@@ -31,7 +31,7 @@ def importImageData(request):
 				cnt = cnt + 1
 				continue
 			
-			if cnt < 5000:
+			if cnt < 5940:
 				cnt = cnt + 1
 				continue
  
@@ -221,7 +221,25 @@ def importImageData(request):
 						)
 				prod_imgtype.save()
 
-
+				# KEY-WORDS
+				attr_kw = Product_attribute.objects.filter(name__iexact = "KEY-WORDS", product = prod).first()
+				if attr_kw :
+					prod_keywords = Product_attribute(
+						id = attr_kw.id,
+						product_id = row[0],
+						name = "KEY-WORDS",
+						value = row[13],
+						display_as_filter = True
+						)
+				else :
+					print('Keywords' + row[13] )
+					prod_keywords = Product_attribute(
+						product_id = row[0],
+						name = "KEY-WORDS",
+						value = row[13],
+						display_as_filter = True
+						)
+				prod_keywords.save()
 				
 				'''						'''
 				''' Insert Product Images '''
@@ -264,10 +282,9 @@ def importImageData(request):
 				#get the category id
 				prod_category = Product_category.objects.filter(name__iexact = row[14]).first()
 				if prod_category is None:
-				
-					prod_cat = Product_Category(
-							store = settings.STORE_ID,
-							category_id = row[14],
+					# Insert
+					prod_cat = Product_category(
+							store = ecom,
 							name = row[14],
 							description = '',
 							background_image = '',
@@ -335,7 +352,7 @@ def importImageData(request):
 			cnt = cnt + 1
 			print(cnt)
 			
-			if cnt > 50000:
+			if cnt > 6000:
 				break
 				
 	return render(request, "eStore/import_image_data.html")
