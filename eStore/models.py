@@ -55,7 +55,7 @@ class Contact_us(models.Model):
     
     def __str__(self):
         return self.name
-	
+		
 	
 # Model - voucher
 # This model stores vouchers that the Store grants.	
@@ -835,24 +835,28 @@ class Profile_group (models.Model):
 	profile_id = models.AutoField(primary_key=True, null=False)
 	name = models.CharField(max_length=30, blank=True)
 	description = models.CharField(max_length=30, blank=True)
+	discount_type = models.CharField(max_length=30, blank=True)
 	discount_percentage = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 	effective_from = models.DateField(blank=True, null=True)
 	effective_to = models.DateField(blank=True, null=True)	
 
 	
-class Profile(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-	full_name = models.CharField(max_length=500, blank=False)
+class Business_profile(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
+	contact_name = models.CharField(max_length=500, blank=False)
 	company =  models.CharField(max_length=30, blank=True)
 	profile_group = models.ForeignKey(Profile_group, models.CASCADE, null=True)
-	address_1 = models.CharField(max_length=600, blank=True, null='')
+	address_1 = models.CharField(max_length=600, blank=False, null=False)
 	address_2 = models.CharField(max_length=600, blank=True, default='')
-	city = models.CharField(max_length=600, blank=True, default='')
-	state = models.ForeignKey(State, on_delete = models.PROTECT, null=True)
+	city = models.CharField(max_length=600, blank=False, null=False)
+	state = models.ForeignKey(State, on_delete = models.PROTECT, null=False)
 	pin_code = models.ForeignKey(Pin_code, on_delete = models.PROTECT, null=True)
 	country = models.ForeignKey(Country, on_delete = models.PROTECT, null=False, default= "IND")
-	phone_number = models.CharField(max_length=30, blank=True, default='')
-
+	phone_number = models.CharField(max_length=30, blank=False, null=False)
+	# email_id  = models.EmailField(blank=True, default='')  -- Same as 'User' email
+	gst_number = models.CharField(max_length=600, blank=True, default='')
+	tax_id = models.CharField(max_length=600, blank=True, default='')
+	
 	
 class Generate_number_by_month(models.Model):
 	type = models.CharField(max_length = 50, null=False, primary_key = True)

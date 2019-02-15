@@ -10,7 +10,7 @@ import json
 
 from django.contrib.auth.models import User
 
-from eStore.models import Ecom_site, Profile, Profile_group
+from eStore.models import Ecom_site, Business_profile, Profile_group
 
 
 from .frame_views import *

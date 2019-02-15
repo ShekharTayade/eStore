@@ -11,7 +11,7 @@ from django.urls import resolve
 from django.contrib import messages
    
 from .cart_views import *
-from eStore.forms import registerForm, profileForm
+from eStore.forms import registerForm, businessprofile_Form, businessuserForm
    
 def eStorelogin(request):
 
@@ -66,3 +66,27 @@ def register(request):
 	else:
 		form = registerForm()
 	return render(request, "eStore/register.html", {'form':form} )
+	
+	
+def business_registration(request):
+
+    
+    if request.method == 'POST':
+        form = businessuserForm(request.POST)
+        businessprofile_form = businessprofile_Form(request.POST)
+        if form.is_valid():
+            if businessprofile_Form.is_valid():
+
+                user = form.save()
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+                userprofile = businessprofile_form.save(commit=False)
+                userprofile.User = user
+                userprofile_form.save()
+            
+                # After successful sign up redirect to payment page
+                return redirect('index')
+    else:
+        form = businessuserForm()
+        businessprofile_form = businessprofile_Form()        
+    return render(request, 'eStore/business_registration.html', {'form': form, 'businessprofile_form': businessprofile_form})

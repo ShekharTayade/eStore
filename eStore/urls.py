@@ -35,6 +35,7 @@ urlpatterns = [
 
 
     url(r'^register/$', views.register, name='register'),	
+    url(r'^business_registration/$', views.business_registration, name='business_registration'),	
     url(r'^contact_us/$', views.contact_us, name='contact_us'),	
     url(r'^contact_msg/$', views.contact_msg, name='contact_msg'),	
 	
@@ -107,7 +108,7 @@ urlpatterns = [
  	url(r'^ajax/get_user_item_price_by_cart_item/$', views.get_user_item_price_by_cart_item, name='get_user_item_price_by_cart_item'),
  	url(r'^ajax/get_user_image_id/$', views.get_user_image_id, name='get_user_image_id'),
 
-	url(r'^product_search/$', views.products_by_keywords, name='products_by_keywords'),	
+	url(r'^product_search/$', views.search_products_by_keywords, name='products_by_keywords'),	
 	
 	
 	] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from datetime import datetime
 import datetime
@@ -159,7 +159,7 @@ def category_products(request, cat_id):
 	product_cate = get_object_or_404 (Product_category, category_id = cat_id)
 
 	if sortOrder == None:
-		products = Product.objects.filter(product_id__in = category_prods).order_by('?')
+		products = Product.objects.filter(product_id__in = category_prods)
 		
 	else:
 		if sortOrder == "PRICEUP":
@@ -266,7 +266,7 @@ def category_products(request, cat_id):
 
 		template = "eStore/prod_display_include.html"
 	else :
-		template = "eStore/category_products_table.html"
+		template = "eStore/category_products.html"
 
 	return render(request, template, {'prod_categories':prod_categories, 
 		'category_prods': category_prods, 'product_category':product_cate, 
@@ -759,28 +759,29 @@ def get_product_promotion(prod_id):
 		
 		
 	return ({'promotion_id':promo_id, 'cash_disc':cash_disc, 'percent_disc':percent_disc})
-
-@csrf_exempt	
-def products_by_keywords(request):
 		
-	keywords = request.GET.get('keywords', '').split()		
+		
+@csrf_exempt	
+def search_products_by_keywords(request):
+		
+	ikeywords = request.GET.get('keywords', '')
+	keywords = ikeywords.split()		
 	sortOrder = request.GET.get("sort")
 	show = request.GET.get("show")
 
 	prod_categories = Product_category.objects.filter(store_id=settings.STORE_ID, trending = True )
 
-	products = Product_attribute.objects.all().select_related('product')
+	products = Product.objects.all()
 
 	for word in keywords:
-		products = products.filter(name = 'KEY-WORDS', 
-			value__icontains = word)
-			
+		products = products.filter(product_attribute__name = 'KEY-WORDS', 
+			product_attribute__value__icontains = word)
+		
 	if request.is_ajax():
-		#Apply the user selected filters -
 
 		# Get data from the request.
 		json_data = json.loads(request.body.decode("utf-8"))
-		
+
 		major_array = []
 		sub_array = []
 		size_key = None
@@ -796,7 +797,12 @@ def products_by_keywords(request):
 					height = int(subkey[(idx+1):])
 					ratio = width/height
 					size_key = "MAX-WIDTH"
-					
+					continue				
+
+				if majorkey == 'SEARCH':
+					# Get the size
+					if subkey == 'KEYWORDS':
+						search_keywords = value.split()					
 					continue				
 
 				if value.upper().strip() == "TRUE":
@@ -804,25 +810,39 @@ def products_by_keywords(request):
 					major_array.append(majorkey)
 					sub_array.append(subkey) 
 
+			
+		# process the keywords that were passed back
+		if search_keywords:
+			for word in search_keywords:
+				products = products.filter(product_attribute__name = 'KEY-WORDS', 
+					product_attribute__value__icontains = word)
+				#q = Q(name = 'KEY-WORDS', value__icontains = word)
+		
+		# Process the SIZE filter
 		if major_array :
-			products = products.filter(name__in = major_array)
+			products = products.filter(product_attribute__name__in = major_array)
 			if sub_array :
-				products = products.filter(value__in = sub_array)		
+				products = products.filter(product_attribute__value__in = sub_array)		
 		
 		if size_key:
 			if width:
-				products = products.filter(name = size_key, 
-					value__gte = width)
+				products = products.filter(product_attribute__name = size_key, 
+					product_attribute__value__gte = width)
 				if ratio :
-					products = products.filter(name = 'ASPECT-RATIO', 
-						value = ratio)
-
+					products = products.filter(product_attribute__name = 'ASPECT-RATIO', 
+						product_attribute__value = ratio)
+			#q_size = Q(name =  size_key, value__gte = width)
+			
+		''' Initate Q objects to build filter '''
+		
+		
+					
 	prods = products.values('product_id')
 					
 	prod_images	= Product_image.objects.filter(product_id__in = prods, image_type = 'FRONT').order_by('product_id')
 	
 	# Let's create the final results 
-	prods_by_category = []
+	prods_by_search = []
 	for p in products:
 
 		rec = {}
@@ -831,11 +851,11 @@ def products_by_keywords(request):
 			if p.product_id == i.product_id:
 				prod_img = i.url
 		rec['product_id'] = p.product_id
-		rec['name'] = p.product.name
-		rec['desription'] = p.product.description
-		rec['price'] = p.product.price
+		rec['name'] = p.name
+		rec['desription'] = p.description
+		rec['price'] = p.price
 		rec['url'] = prod_img
-		prods_by_category.append(rec)	
+		prods_by_search.append(rec)	
 		
 
 	prod_filters = ['ORIENTATION', 'ARTIST', 'IMAGE-TYPE']
@@ -853,7 +873,7 @@ def products_by_keywords(request):
 			if show == 'ALL':
 				perpage = 999999
 				
-	paginator = Paginator(prods_by_category, perpage) 
+	paginator = Paginator(prods_by_search, perpage) 
 	page = request.GET.get('page')
 	prods = paginator.get_page(page)
 
@@ -865,4 +885,4 @@ def products_by_keywords(request):
 
 	return render(request, template, {'prod_categories':prod_categories, 
 		'products':products, 'prods':prods, 'sortOrder':sortOrder, 'show':show, 'prod_filters':prod_filters,
-		'prod_filter_values':prod_filter_values, 'keywords':keywords} )
+		'prod_filter_values':prod_filter_values, 'ikeywords':ikeywords} )

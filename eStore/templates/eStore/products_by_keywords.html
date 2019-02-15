@@ -131,7 +131,7 @@
 				<div class="col-lg-9">
 					<div class="box-cat">
 						<h1>Search Results</h1>
-						<p>{% if keywords %} You Searched for: "{{keywords}}" {% endif %}</p>
+						<p>{% if ikeywords %} You Searched for: "{{ikeywords}}" {% endif %}</p>
 					 </div>
 					 
 					<!-- Category header -->
@@ -211,9 +211,15 @@
 				rec = ', "SIZE": {"' + size_val + '" : ' + ' "true"';
 				filter = filter + rec + ' }';
 			}
+
+			if ("{{ikeywords}}" != "") {
+				rec = ', "SEARCH": {"KEYWORDS" : ' + ' "{{ikeywords}}"';
+				filter = filter + rec + ' }';
+			}
+
 			
 			filter = filter + '}';
-
+			
 			
 			$.ajax({url: '{% url "products_by_keywords" %}', 
 				data: filter, 
@@ -231,6 +237,12 @@
 			});			
 			
 		}
+		
+		$( document ).ready(function() {
+			// Set keywords back into the search fieldset
+			$("#keywords").val("{{ikeywords}}");
+		
+		});
 	</script>
 	{% endblock jscripts %}
 			

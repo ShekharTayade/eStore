@@ -29,7 +29,7 @@ def admin_menu(request):
 	return {'ecom_site':ecom, 'request':request, 'user': request.user}	
 	
 	
-@register.inclusion_tag('eStore/estore_menu1.html')	
+@register.inclusion_tag('eStore/estore_menu_with_search.html')	
 def menubar(request):
 
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )

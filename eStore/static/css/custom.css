@@ -716,3 +716,12 @@ top #phone-help .modal-header h5 {
 #all{
 	padding: 0 2rem;
 }
+
+.quote-leftbar {
+	color: #000 !important;
+	background-color: #fdf5e6 !important;
+	border-left: 6px solid #ccc !important;
+	font-size: 18px !important;
+	font-family: serif;
+	padding : 20px;
+}
