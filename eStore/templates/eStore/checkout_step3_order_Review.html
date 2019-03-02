@@ -101,7 +101,7 @@
 							</a>
 							<a href="#" class="nav-link flex-sm-fill text-sm-center"> 
 								<i class="fa fa-truck"></i>
-								Shipping Method
+								Shipping
 							</a>
 							<!-- <a href="#" class="nav-link flex-sm-fill text-sm-center disabled"> 
 								<i class="fa fa-money"></i>
@@ -151,7 +151,7 @@
 												<br />
 
 												<div class = "pull-left">
-													<button type ="button" class = "btn btn-link pull-left" onclick = "getFramedImg('{{i.product_id}}', '{{i.image_width}}', '{{i.moulding_id}}', '{{i.mount__color}}','{{i.mount_size}}', '{{i.product__product_image__url}}');">
+													<button type ="button" class = "btn btn-link" style = "padding-left:0px;" onclick = "getFramedImg('{{i.product_id}}', '{{i.image_width}}', '{{i.moulding_id}}', '{{i.mount__color}}','{{i.mount_size}}', '{{i.product__product_image__url}}');">
 														{{i.product__name}}
 													</button>
 												</div>
@@ -201,7 +201,7 @@
 											<td><img src = "{{MEDIA_URL}}{{i.user_image__image_to_frame}}" style = "width:75px; height:75px; object-fit:contain;">
 												<br />
 												<div class = "pull-left">
-													<button style="padding-left:0px;" type ="button" class = "btn btn-link pull-left" onclick = "getFramedUserImg('{{i.user_image_id}}', '{{i.image_width}}', '{{i.moulding_id | default_if_none:0}}', '{{i.mountcolor | default_if_none:0}}','{{i.mount_size | default_if_none:0}}', '{{i.product__product_image__url | default_if_none:""}}');">
+													<button style="padding-left:0px;" type ="button" class = "btn btn-link pull-left" onclick = "getFramedUserImg('{{i.user_image_id}}', '{{i.image_width}}', '{{i.moulding_id | default_if_none:0}}', '{{i.mountcolor | default_if_none:0}}','{{i.mount_size | default_if_none:0}}', '{{i.user_image__image_to_frame | default_if_none:""}}');">
 														{{i.user_image__image_to_frame.name|truncatechars:15 }}
 													</button>
 												</div>

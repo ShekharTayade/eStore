@@ -8,7 +8,7 @@
 {% load show_featured_products_section from prod_template_tags %}
 {% load show_trending_categories from prod_template_tags %}
 {% load show_featured_collections from prod_template_tags %}
-{% load show_collections_section from prod_template_tags %}
+{% load show_create_your_space from prod_template_tags %}
 {% load show_egift from prod_template_tags %}
 {% load show_referral from estore_base %}
 {% load client_speak from estore_base %}
@@ -60,6 +60,10 @@
 		
 		<!-- Goole Font -->
 		<link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet">
+
+		<!-- JQuery DataTables -->
+		<link rel="stylesheet" type="text/css" href="{% static 'vendor/DataTables/datatables.min.css' %}" />
+
 		
 		<!-- Tweaks for older IEs--><!--[if lt IE 9]>
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -81,6 +85,10 @@
 		<!-- Bootstrap-table scripts -->
 		<script src="{% static 'vendor/bootstrap-table/bootstrap-table.min.js' %}"></script>
 		<script src="{% static 'vendor/bootstrap-table-expandable/js/bootstrap-table-expandable.js' %}"></script>
+
+		<!-- JQuery DataTables -->
+		<script type="text/javascript" src="{% static 'vendor/DataTables/datatables.min.js' %}"></script>
+
 		
 	</head>
 	{% endblock html-head %}
@@ -88,7 +96,7 @@
 	<body>
 		<!-- Header Section with top slim line, logo/search/cart and menu-->
 		{% block siteheader %}
-		<header class="header mb-2">
+		<header class="header">
 			
 			
 			<!-- Top slim bar with tagline, login, register etc-->
@@ -107,7 +115,7 @@
 
 
 		<div id="all">
-			<div id="content" class= " h-25" style="background-color:#fff">
+			<div id="content" class= "" style="background-color:#fff">
 				{% block sitecontent %}
 							
 				{% show_main_slider_section %}
@@ -124,15 +132,15 @@
 					</div>
 				</div> -->
 				
-				{% show_frame_my_art request %}
-
 				{% show_featured_collections %}
+
+				{% show_frame_my_art request %}
 			
+				{% show_create_your_space request %}
+
 				{% show_egift request %}
 				
 				{% show_referral %}
-
-				{% client_speak request %}
 
 				{% endblock sitecontent %}
 

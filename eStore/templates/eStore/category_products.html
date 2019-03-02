@@ -118,11 +118,9 @@
 									<button type = "button" class="btn btn-secondary btn-sm pull-left" onclick = "getAllFilters()"><i class="fa fa-pencil"></i> Apply</button>
 									<button type = "button" class="btn btn-sm btn-outline-secondary pull-right" onclick = "clearFilter('{{pf}}')"><i class="fa fa-times-circle"></i> Clear</button>
 								</form>
-							</div>
-									
+							</div>									
 						</div>
 					</div>
-					
 					<!-- *** CATEGORIES AND FILTERS END ***-->
 				</div>
 				<!-- /.col-md-3-->
@@ -144,14 +142,14 @@
 									<div class="products-number">
 										<strong>Show</strong><a href="?page={{prods.number}}&sort={{sortOrder}}&show=50" class="btn btn-sm {% if show == '50' or show == None %} btn-primary {% else %} btn-outline-secondary {% endif %}">50</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=100" class="btn btn-sm {% if show == '100' %} btn-primary {% else %} btn-outline-secondary {% endif %}">100</a><a href="?page={{prods.number}}&sort={{sortOrder}}&show=ALL" class="btn btn-sm {% if show == 'ALL' %} btn-primary {% else %} btn-outline-secondary {% endif %}">All</a><span>results/page</span>
 									</div>
-									<div class = "pull-right">
+									<!-- <div class = "pull-right">
 										<div id = "sortOrder" class="products-sort-by mt-2 mt-lg-0">
 											<strong>Sort by</strong>
 											Price 
 											<a href= "?page={{prods.number}}&sort=PRICEUP&show={{show}}"><i class = "fa fa-arrow-circle-up fa-2x"></i><small>Low to High</small></a>
 											<a href= "?page={{prods.number}}&sort=PRICEDOWN&show={{show}}"><i class = "fa fa-arrow-circle-down fa-2x"></i><small>High to Low</small></a>
 										</div>
-									</div>
+									</div> -->
 								</form>
 							</div>
 
@@ -218,12 +216,15 @@
 				$(".{{pf}}").each(function () {
 					var val = $(this).next('label').text();
 					var sts = $(this).is(":checked");
-					if (valcnt == 0){
-						rec = rec + '"' + val.trim() + '": ' + ' " ' + sts + '"';
-					} else {
-						rec = rec + ', "' + val.trim() + '": ' + ' " ' + sts + '"';
+					if (sts) {
+						if (valcnt == 0){
+							rec = rec + '"' + val.trim() + '": ' + ' " ' + sts + '"';
+						} else {
+							rec = rec + ', "' + val.trim() + '": ' + ' " ' + sts + '"';
+						}
+						valcnt = valcnt + 1;
 					}
-					valcnt = valcnt + 1;
+					
 				});
 				filter = filter + rec + ' }';
 				fcnt = fcnt + 1;
@@ -256,6 +257,24 @@
 			});			
 			
 		}
+	</script>
+	
+	<script>
+		var isBreakpoint = function(viewport_size){
+		  return $('.device-' + viewport_size).is(':visible')
+		}	
+	
+		jQuery(document).ready(function(){
+
+			  if (isBreakpoint('xs')){
+				$('#cat_navigation').removeClass('show');
+				$('#filter_navigation').removeClass('show');
+			  }
+			  else {
+				$('#cat_navigation').addClass('show');
+				$('#filter_navigation').addClass('show');
+			  }		
+		});
 	</script>
 	{% endblock jscripts %}
 			

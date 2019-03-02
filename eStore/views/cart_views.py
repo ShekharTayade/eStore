@@ -123,7 +123,7 @@ def add_to_cart(request):
 	
 	try:
 		if prod_id != '':
-			prod = Product.objects.get(product_id=prod_id)
+			prod = Product.objects.get(product_id=prod_id, is_published = True)
 		else :
 			if request.user.is_authenticated:
 				user = User.objects.get(username = request.user)

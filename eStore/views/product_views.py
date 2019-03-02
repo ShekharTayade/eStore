@@ -23,7 +23,7 @@ def product_details(request, prod_id):
 		return
 	
 	# get the product
-	prod_detail = Product.objects.get(product_id = prod_id)
+	prod_detail = Product.objects.get(product_id = prod_id, is_published = True)
 	
 	prod_imgs = Product_image.objects.filter( product_id = prod_id )
 	prod_images = []
@@ -159,13 +159,13 @@ def category_products(request, cat_id):
 	product_cate = get_object_or_404 (Product_category, category_id = cat_id)
 
 	if sortOrder == None:
-		products = Product.objects.filter(product_id__in = category_prods)
-		
+		######products = Product.objects.filter(product_id__in = category_prods, is_published = True)
+		None
 	else:
 		if sortOrder == "PRICEUP":
-			products = Product.objects.filter(product_id__in = category_prods).order_by('price')
+			products = Product.objects.filter(product_id__in = category_prods, is_published = True).order_by('price')
 		else:
-			products = Product.objects.filter(product_id__in = category_prods).order_by('-price')
+			products = Product.objects.filter(product_id__in = category_prods, is_published = True).order_by('-price')
 			
 	if request.is_ajax():
 		#Apply the user selected filters -
@@ -173,14 +173,47 @@ def category_products(request, cat_id):
 		# Get data from the request.
 		json_data = json.loads(request.body.decode("utf-8"))
 
-		
 		major_array = []
 		sub_array = []
 		size_key = None
 		size_val = None
 		width = 0
+		products = Product.objects.filter(product_id__in = category_prods, is_published = True)
+	
+		import pdb
+		pdb.set_trace()
+	
+		t_f = Q()
 		for majorkey, subdict in json_data.items():
-
+			#######################################
+			s_keys = json_data[majorkey]
+			f = Q()
+			for s in s_keys:
+				if majorkey == 'SIZE':
+					# Get the size
+					idx = s.find("_")
+					width = int(s[:idx])
+					height = int(s[(idx+1):])
+					ratio = width/height
+			
+				if majorkey == 'IMAGE-TYPE':
+					f = f | Q(image_type = s)
+				if majorkey == 'ORIENTATION':
+					f = f | Q(orientation = s)
+				if majorkey == 'SIZE':
+					f = f | ( (Q(max_width__gte = width) & Q(max_height__gte = height) ) &  Q(aspect_ratio = ratio) )
+				if majorkey == 'ARTIST':
+					f = f | Q(artist = s)
+				if majorkey == 'COLORS':
+					f = f | Q(colors__icontains = s)
+				if majorkey == 'KEY-WORDS':
+					f = f | Q(key_words__icontains = s)
+			
+			t_f = t_f & f
+		print (t_f)
+		products = products.filter( t_f )	
+		
+		'''
 			for subkey, value in subdict.items():
 				if majorkey == 'SIZE':
 					# Get the size
@@ -196,27 +229,137 @@ def category_products(request, cat_id):
 					print ( "Apply - " + majorkey + " : " + subkey)
 					major_array.append(majorkey)
 					sub_array.append(subkey) 
-				
-		products = Product.objects.filter(product_id__in = category_prods)
+		'''	
 
+		'''
+		mq = Q()
+		m_prev = major_array[0]
+		m_len = len(major_array)
+		for m in major_array:
+			if m == m_prev :
+				if m == 'IMAGE-TYPE"':
+					mq = mq | Q(image_type__in = sub_array)
+				if m == 'ORIENTATION':
+					mq = mq | Q(orientation__in = sub_array)
+				if m == 'MAX-WIDTH':
+					mq = mq | ( Q(max_width__gte = sub_array) & Q( aspect_ratio__in = ratio ) )
+				if m == 'MAX-HEIGHT':
+					mq = mq | Q(max_height__in = sub_array)
+				if m == 'PUBLISHER':
+					mq = mq | Q(publisher__in = sub_array)
+				if m == 'ARTIST':
+					mq = mq | Q(artist__in = sub_array)
+				if m == 'COLORS':
+					mq = mq | Q(colors__in = sub_array)
+				if m == 'KEY-WORDS':
+					mq = mq | Q(key_words__in = sub_array)
+					
+				# If there's only one filter, apply it here
+				if m_len == 1:
+					products = products.filter( mq )
+			else :
+				products = products.filter( mq )
+				# Apply filter for last item
+				m_prev = m
+				mq = Q()
+				
+				if m == major_array[m_len - 1]:
+					if m == 'IMAGE-TYPE"':
+						mq = mq | Q(image_type__in = sub_array)
+					if m == 'ORIENTATION':
+						mq = mq | Q(orientation__in = sub_array)
+					if m == 'MAX-WIDTH':
+						mq = mq | ( Q(max_width__gte = sub_array) & Q( aspect_ratio__in = ratio ) )
+					if m == 'MAX-HEIGHT':
+						mq = mq | Q(max_height__in = sub_array)
+					if m == 'PUBLISHER':
+						mq = mq | Q(publisher__in = sub_array)
+					if m == 'ARTIST':
+						mq = mq | Q(artist__in = sub_array)
+					if m == 'COLORS':
+						mq = mq | Q(colors__in = sub_array)
+					if m == 'KEY-WORDS':
+						mq = mq | Q(key_words__in = sub_array)					
+					products = products.filter( mq )
+		'''
+				
+				
+				
+				
+		'''
+				if m == 'IMAGE-TYPE"':
+					products = products.filter( image_type__in = sub_array )
+				if m == 'ORIENTATION':
+					products = products.filter( orientation__in = sub_array )
+				if m == 'MAX-WIDTH':
+					products = products.filter( max_width__gte = sub_array )
+					products = products.filter( aspect_ratio__in = ratio )
+				if m == 'MAX-HEIGHT':
+					products = products.filter( max_height__in = sub_array )
+				if m == 'PUBLISHER':
+					products = products.filter( publisher__in = sub_array )
+				if m == 'ARTIST':
+					products = products.filter( artist__in = sub_array )
+				if m == 'COLORS':
+					products = products.filter( colors__in = sub_array )
+				if m == 'KEY-WORDS':
+					products = products.filter( key_words__in = sub_array )
+		'''
+
+		'''
 		if major_array :
-			products = products.filter(product_attribute__name__in = major_array)
+			products = products.filter(product_attribute__name__in = major_array).distinct()
+			
 			if sub_array :
-				products = products.filter(product_attribute__value__in = sub_array)		
-		
+				products = products.filter(product_attribute__value__in = sub_array).distinct()		
+				
 		if size_key:
 			if width:
 				products = products.filter(product_attribute__name = size_key, 
-					product_attribute__value__gte = width)
+					product_attribute__value__gte = width).distinct()
+					
 				if ratio :
 					products = products.filter(product_attribute__name = 'ASPECT-RATIO', 
-						product_attribute__value = ratio)
+						product_attribute__value = ratio).distinct()
+		'''
+		
+		# Let's create the final results 
+		######
+		prod_images	= Product_image.objects.filter(product_id__in = category_prods, 
+			image_type = 'FRONT').order_by('product_id').distinct()	
+		
+		prods_by_category = []
+		for p in products:
 
+			rec = {}
+			prod_img = ""
+			for i in prod_images:
+				if p.product_id == i.product_id:
+					prod_img = i.url
+			rec['product_id'] = p.product_id
+			rec['product.name'] = p.name
+			rec['desription'] = p.description
+			rec['price'] = p.price
+			rec['url'] = prod_img
+			prods_by_category.append(rec)	
+		######
+						
+						
+						
 					
-	prod_images	= Product_image.objects.filter(product_id__in = category_prods, image_type = 'FRONT').order_by('product_id')
+	######prod_images	= Product_image.objects.filter(product_id__in = category_prods, image_type = 'FRONT').order_by('product_id')
+	else :
+		######
+		prods_by_category = Product_image.objects.filter(product_id__in = category_prods, 
+			image_type = 'FRONT').select_related('product').filter(
+				product__is_published__isnull = False).order_by('product_id')
 
 	
-	# Let's create the final results 
+		products = Product.objects.filter(product_id__in = category_prods, is_published = True).values('product_id')
+		######
+	
+	######
+	'''
 	prods_by_category = []
 	for p in products:
 
@@ -231,10 +374,11 @@ def category_products(request, cat_id):
 		rec['price'] = p.price
 		rec['url'] = prod_img
 		prods_by_category.append(rec)	
-		
+	'''
+	######
 
 	prod_filters = ['ORIENTATION', 'ARTIST', 'IMAGE-TYPE']
-	prod_filter_values = Product_attribute.objects.filter(product__in = products).values(
+	prod_filter_values = Product_attribute.objects.filter(product_id__in = products).values(
 	'name', 'value').distinct().order_by('value')
 
 
@@ -289,12 +433,12 @@ def all_products(request):
 	
 
 	if sortOrder == None:
-		products = Product.objects.all()
+		products = Product.objects.filter(is_published = True)
 	else:
 		if sortOrder == "PRICEUP":
-			products = Product.objects.all().order_by('price')
+			products = Product.objects.filter(is_published = True).order_by('price')
 		else:
-			products = Product.objects.all().order_by('-price')
+			products = Product.objects.filter(is_published = True).order_by('-price')
 			
 	
 	prod_images	= Product_image.objects.filter(image_type = 'FRONT').order_by('product_id')
@@ -382,7 +526,7 @@ def show_categories(request):
 	# Get all the categories along with count of images in each
 	categories_list = Product_category.objects.annotate(Count(
 		'product_product_category')).filter(
-		product_product_category__count__gt = 0).order_by('-product_product_category__count')
+		product_product_category__count__gt = 0).order_by('name')
 	#values('product_category_id',
 	#	'product_category__name', 'product_category__url'
 
@@ -771,7 +915,7 @@ def search_products_by_keywords(request):
 
 	prod_categories = Product_category.objects.filter(store_id=settings.STORE_ID, trending = True )
 
-	products = Product.objects.all()
+	products = Product.objects.filter(is_published = True)
 
 	for word in keywords:
 		products = products.filter(product_attribute__name = 'KEY-WORDS', 

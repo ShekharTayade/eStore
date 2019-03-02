@@ -1,11 +1,12 @@
 {% extends 'eStore/estore_base.html' %}
 {% load static %}
+{% load show_trending_categories from prod_template_tags %}
+
 	<!-- Only Override the site content block -->
 	{% block sitecontent %}
         <div class="container">
 			<div class="row">
 
-				<!-- breadcrumb-->
 				<div class="col-lg-12">
 					<nav aria-label="breadcrumb">
 						<ol class="breadcrumb">
@@ -20,11 +21,12 @@
 					<div class="box-cat">
 						<h1>All Categories</h1>
 					 </div>
-					<div class = "row">
+					<!--<div class = "row">
 						<div class = "col-sm-12">
 							<img src ="{% static 'img/categories.png' %}" alt="" class="img-fluid img-all-categories"> 
 						</div>
-					</div>
+					</div> -->
+					{% show_trending_categories %}
 					<!-- Category header -->
 					<div class="box-cat info-bar">
 						<div class="row">
@@ -48,7 +50,7 @@
 					<small>{{categories.paginator.count}} results found</small>
 					<div class = "row">
 					{% for c in categories %}
-					<div class="col-lg-3 col-md-6">
+					<div class="col-lg-2 col-md-6">
 						<div class="cat-card">
 							<!-- {% with 'img/'|add:c.url as image_static %}
 							<a href="{% url 'category_products' c.category_id %}">
@@ -59,9 +61,9 @@
 							</a>
 							{% endwith %} -->
 							<a href="{% url 'category_products' c.category_id %}">
-								<h2>{{c.name|title}}</h2>
+								<h4 style="color:#000 !important">{{c.name|title|default:'Unspecified'|default_if_none:'Unspecified'}}</h4>
 								<!--<p>{{c.description}}</p>-->
-								<p><button class = "btn btn-primary"><span data-counter-up class="badge">{{c.product_product_category__count}}</span></button></p>
+								<p>(<span data-counter-up class="badge">{{c.product_product_category__count}}</span>)</p>
 							</a>
 						</div>
 					</div>

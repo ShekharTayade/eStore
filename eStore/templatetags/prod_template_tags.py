@@ -72,14 +72,14 @@ def show_featured_products_section():
 
 	return {'featured_prods':featured_prods, 'ecom_site':ecom}
 	
-
+'''
 @register.inclusion_tag('eStore/collections.html')
 def show_collections_section():
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
-	'''Get the collections'''
 	prod_collections = Product_collection.objects.filter(store = ecom)
 
 	return {'prod_collections':prod_collections, 'ecom':ecom}
+'''
 
 @register.inclusion_tag('eStore/trending_categories.html')
 def show_trending_categories():
@@ -113,6 +113,13 @@ def show_frame_my_art(request):
 	
 	return {'show_frames':show_frames, 'ecom_site':ecom}	
 
+@register.inclusion_tag('eStore/show_create_your_space.html')
+def show_create_your_space(request):
+	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )
+	
+	return {'ecom_site':ecom}	
+
+	
 @register.inclusion_tag('eStore/show_egift_section.html')
 def show_egift(request):
 	ecom = get_object_or_404 (Ecom_site, store_id=settings.STORE_ID )

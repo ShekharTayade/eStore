@@ -254,3 +254,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 MOULDING_ROOT = os.path.join(BASE_DIR, 'eStore/static/img/')
+TMP_FILES = os.path.join(BASE_DIR, 'eStore/static/tmp/')
+CSS_FILES = os.path.join(BASE_DIR, 'eStore/static/css/')
+VENDOR_FILES = os.path.join(BASE_DIR, 'eStore/static/vendor/')

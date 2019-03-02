@@ -27,10 +27,13 @@ top #phone-help .modal-header h5 {
 
 
 .img-container-cat {
-	width:225px !important;
-    height: 225px;
-    object-fit: contain;	
+	width:100px !important;
+    height: 100px;
+    object-fit: cover;	
 	border-radius:50%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;	
 }
 
 .img-category{
@@ -135,7 +138,7 @@ top #phone-help .modal-header h5 {
 	background-color: #fff;
 	font-size : 1.25em;
 	text-align: center;
-	margin-top : 15px;
+/*	margin-top : 15px; */
 	font-family: Georgia, serif;
 }
 
@@ -523,7 +526,7 @@ top #phone-help .modal-header h5 {
 /*  Product Card CSS */
 .cat-card {
 /*  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);*/
-  border: 1px solid gainsboro;
+  border: 0px;
   max-width: 300px;
   margin: 10px 0px 10px;
   text-align: center;
@@ -540,16 +543,18 @@ top #phone-help .modal-header h5 {
 }
 
 .cat-card button {
-  border: 2px solid #48acea;
+  border: 0px;
   outline: 0;
-  padding: 8px;
+  padding: 10px;
   color: #000;
   background-color: lightgrey;
   text-align: center;
   cursor: pointer;
   width: 50%;
-  font-size: 16px;
   border-radius: 15px;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 400;
 }
 
 .cat-card button:hover {
@@ -708,9 +713,10 @@ top #phone-help .modal-header h5 {
   -moz-border-radius: 0;
   border-radius: 0;
   padding: 10px 15px;
-  font-size: 0.8 rem;
-  font-weight: 600;
+  font-size: 0.75 rem;
+  font-weight: 500;
   color: #fff;
+  letter-spacing: 0.1rem;
 } 
 
 #all{
@@ -724,4 +730,41 @@ top #phone-help .modal-header h5 {
 	font-size: 18px !important;
 	font-family: serif;
 	padding : 20px;
+}
+
+
+.trending-cat a {
+	color: #000 !important;
+}
+
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  width: 100%;
+  border-radius: 5px;
+  margin-bottom: 25px;
+  padding:10px;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}	
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 2px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+.img-in-menu {
+	width:125px !important;
+    height: 125px;
+    object-fit: cover;	
+	display: block;
+	margin-left: auto;
+	margin-right: auto;	
 }

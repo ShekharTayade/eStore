@@ -2,15 +2,13 @@
 <!-- Featured Products  Header -->
 {% if ecom_site.show_featured_section %}
 <div id="collections">
-	<div class="box py-2">
+	<div class="mt-2 mb-3 py-2">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
 					<h2 class="mb-0 text-center">{{ecom_site.featured_header}}</h2>
 					<div class = "text-center">
 						<span class = "section-text">
-							We bring to you top trending categores from our collection.<br/>
-							Browse the them, select the art you like, and we will deliver it to you.
 						</span>
 					</div>
 				</div>
@@ -18,22 +16,9 @@
 		</div>
 	</div>
 </div>
-<!-- <div id="featured-art">
-	<div class="box py-2">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-12">
-					<h2 class="mb-0">{{ecom_site.featured_header}}</h2>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>-->
-<!-- END: Featured Products  Header -->		
-
 
 <!-- Featured items slider -->
-<div class="container">
+<div class="">
 	<div class="product-slider owl-carousel owl-theme">
 		{% for c in trending_categories %}
 		<div class="item">  
@@ -44,9 +29,9 @@
 						</a>
 					</div>
 					{% endwith %}
-					<div class="text text-center">
+					<div class="mt-2 trending-cat text text-center">
 						<h5>
-							<a href="{% url 'category_products' c.category_id %}">{{ c.name }}</a>
+							<a href="{% url 'category_products' c.category_id %}">{{ c.name|title }}</a>
 						</h5>
 					</div>
 					

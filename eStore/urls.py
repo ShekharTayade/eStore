@@ -31,9 +31,17 @@ urlpatterns = [
        auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
        name='password_reset_complete'), 
 	
-	#path('', views.index, name='index'),
+    url(r'^my_account/$', views.my_account, name='my_account'),	
+    url(r'^my_orders/$', views.my_orders, name='my_orders'),	
+    url(r'^ajax/get_orders/$', views.get_orders, name='get_orders'),	
+    url(r'^order_pdf/$', views.get_orders, name='get_orders'),
 
-
+	
+	url(r'^store_orders/$', views.store_orders, name='store_orders'),	
+	url(r'^ajax/get_store_orders/$', views.get_store_orders, name='get_store_orders'),	
+	url(r'^store_order_pdf/$', views.get_store_orders, name='get_store_orders'),
+	
+	
     url(r'^register/$', views.register, name='register'),	
     url(r'^business_registration/$', views.business_registration, name='business_registration'),	
     url(r'^contact_us/$', views.contact_us, name='contact_us'),	
@@ -49,8 +57,6 @@ urlpatterns = [
 	path('category_prods/<int:cat_id>/', views.category_products, name='category_products'),	
     url(r'^all_products/$', views.all_products, name='all_products'),
 	
-	
-    url(r'^basket/$', views.basket, name='basket'),
     url(r'^basket/$', views.show_frame, name='show_frame'),
 	
 	url(r'^ajax/add_to_cart/$', views.add_to_cart, name='add_to_cart'),
@@ -74,7 +80,7 @@ urlpatterns = [
 	
 	path('show_collection/<int:coll_id>/', views.show_collection, name='show_collection'),	
 
-    url(r'^import_image_data/$', views.importImageData, name='import_image_data'),
+    url(r'^import_image_data/$', views.importImageData_NEW, name='import_image_data'),
 	
 	path('show_frames/<int:frame_id>/', views.show_frames, name='show_frames'),	
 
@@ -96,7 +102,9 @@ urlpatterns = [
 
 	
 	url(r'^promotion_products/$', views.promotion_products, name='promotion_products'),
-	url(r'^architect_registration/$', views.profile_group, name='profile_group'),
+	#url(r'^architect_registration/$', views.profile_group, name='profile_group'),
+	url(r'^pending_business_accounts/$', views.pending_business_accounts, name='pending_business_accounts'),
+	url(r'^business_account_approval/$', views.business_account_approval, name='business_account_approval'),
 
 	
     url(r'^user_image/$', views.user_image, name='user_image'),

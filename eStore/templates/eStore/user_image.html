@@ -125,7 +125,7 @@
 							</p>
 							<p class="text-center buttons">
 								<button class="btn btn-primary" onclick="addProdToCart(1)"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								<button class="btn btn-outline-primary" onclick="addProdToWishlist(1)"><i class="fa fa-shopping-cart"></i>Add to wishlist</button>
+								<button class="btn btn-outline-primary" onclick="addProdToWishlist(1)"><i class="fa fa-heart"></i>Add to wishlist</button>
 								<!--<a href="#" class="btn btn-outline-primary"><i class="fa fa-heart"></i> Add to wishlist</a>-->
 							</p>
 							<!-- <p class="text-center buttons"><a href="#" class="btn btn-primary"><i class="fa fa-picture-o"></i> Add Frame to This </a></p> <div class ="text-center"><a href="#" >How does it work?</a></div> -->
@@ -783,25 +783,26 @@
 				success: function (data) {
 					document.getElementById("prod-img").style.objectFit ="contain";
 					document.getElementById("prod-img").src = "data:image/png;base64," + data;
-					setTimeout(function (){}, 500);
-					// Validate print size
-					var img = document.getElementById('prod-img');
-					var width = img.naturalWidth;
-					var height = img.naturalHeight;
-					var max_width = Math.floor(width / ppi);
-					var max_height = Math.floor(height / ppi);
-					var currwidth = $("#size-slider").slider("value");
+					setTimeout(function (){
+						// Validate print size
+						var img = document.getElementById('prod-img');
+						var width = img.naturalWidth;
+						var height = img.naturalHeight;
+						var max_width = Math.floor(width / ppi);
+						var max_height = Math.floor(height / ppi);
+						var currwidth = $("#size-slider").slider("value");
 
-					if (currwidth > max_width) {
-						$("#size_validation").html("With this image, the best quality printing can be done up to size of width: " + max_width + " inch, height: " + max_height + " inch");
-					} else {
-						$("#size_validation").html("");
-					}
-					
-					set_user_image_id();
-					set_size_slider();
-					get_applicable_frames();
-					calc_total_price();
+						if (currwidth > max_width) {
+							$("#size_validation").html("With this image, the best quality printing can be done up to size of width: " + max_width + " inch, height: " + max_height + " inch");
+						} else {
+							$("#size_validation").html("");
+						}
+						
+						set_user_image_id();
+						set_size_slider();
+						get_applicable_frames();
+						calc_total_price();
+					}, 500);
 				},
 				error: function(xhr){
 					alert("An error occured: " + xhr.status + " " + xhr.statusText + " Apologies for the inconvenience!! Please let us know the details and we will be happy to help sort it out."); 

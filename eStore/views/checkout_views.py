@@ -12,7 +12,7 @@ from decimal import Decimal
 
 from eStore.models import Cart, Cart_item, Order, Order_items
 from eStore.models import User_billing_address, User_shipping_address
-from eStore.models import Order_billing, Order_shipping
+from eStore.models import Order_billing, Order_shipping, Shipping_cost_slabs
 from eStore.models import Country, State, City, Pin_code, Pin_city_state_country
 
 today = datetime.date.today()
@@ -527,6 +527,10 @@ def checkout_saveAddr_shippingMethod(request):
 			)	
 		
 		b.save()
+		
+		# Get the shipping cost
+		shipping_cost = get_shipping_cost_by_slab(order.order_total)
+		
 
 	except IntegrityError as e:
 		err_msg.append('Apologies!! Could not save your order. Please use the "Contact Us" link at the bottom of this page and let us know. We will be glad to help you.')
@@ -560,15 +564,16 @@ def checkout_saveAddr_shippingMethod(request):
 	# if there is any error, return to the same page
 	if len(err_msg) > 0 :
 		return render(request, "eStore/checkout_step1_address_new.html", {'msg':err_msg, 'order_total':order.order_total,
-						'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,  'shipping_cost':order.shipping_cost,
+						'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,  'order_shipping_cost':order.shipping_cost,
 						'disc_amt':order.order_discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
 						'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'order_id':order_id, 'cart_id':order.cart_id})
 	else:
-		return render(request, "eStore/checkout_step2_shipping_method.html", { 
-				'order_total':order.order_total, 'order_id': order_id, 'shipping_cost':order.shipping_cost,
+		#return render(request, "eStore/checkout_step2_shipping_method.html", { 
+		return render(request, "eStore/checkout_step2_shipping_cost_by_slab.html", { 
+				'order_total':order.order_total, 'order_id': order_id, 'order_shipping_cost':order.shipping_cost,
 				'sub_total':order.sub_total, 'tax':order.tax,'shipping_addr':o, 'billing_addr':b,
 				'disc_amt':order.order_discount_amt, 'country_arr':country_arr, 'state_arr':state_arr, 
-				'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'cart_id':order.cart_id})
+				'city_arr':city_arr, 'pin_code_arr':pin_code_arr, 'cart_id':order.cart_id, 'shipping_cost':shipping_cost})
 
 def checkout_step3_order_review(request):
 
@@ -669,5 +674,17 @@ def checkout_step3_order_review(request):
 	
 	return render(request, "eStore/checkout_step3_order_Review.html", {'order':o, 'order_items':order_items, 
 				'usercartitems':usercartitems, 'user_image':user_image})
-	
-	
+
+@csrf_exempt
+def get_shipping_cost_by_slab(order_total):
+
+	slabs = Shipping_cost_slabs.objects.filter( effective_from__lte = today, effective_to__gte = today ).order_by('slab_from')
+	shipping_cost = 0
+	for s in slabs :
+		s_from = s.slab_from
+		s_to = s.slab_to
+		
+		if order_total >= s_from and order_total <= s_to:
+			shipping_cost = s.flat_shipping_cost
+			
+	return (shipping_cost)	

@@ -12,7 +12,7 @@ from decimal import Decimal
 import json
 
 from eStore.models import Product_category
-from eStore.models import Promotion_images, Product, User_image, Frame_promotion
+from eStore.models import Promotion, Promotion_images, Product, User_image, Frame_promotion
 from eStore.models import Wishlist, Wishlist_item, Tax
 
 from .frame_views import *
@@ -123,7 +123,7 @@ def add_to_wishlist(request):
 	
 	try:
 		if prod_id != '':
-			prod = Product.objects.get(product_id=prod_id)
+			prod = Product.objects.get(product_id=prod_id, is_published = True)
 		else :
 			if request.user.is_authenticated:
 				user = User.objects.get(username = request.user)
@@ -188,7 +188,7 @@ def add_to_wishlist(request):
 	userwishlist = {}
 	wishlist_qty = 0
 	''' Let's check if the user has a wishlist open '''
-	
+
 	sessionid = request.session.session_key
 	if request.user.is_authenticated:
 		try:

@@ -44,7 +44,7 @@
 								<strong>Shipping & handling</strong>
 							</div>
 							<div class = "col-sm-12">		
-								<span id ="s-h" class = "ord-row">{{shipping_cost|floatformat}}</span>
+								<span id ="s-h" class = "ord-row">{{order_shipping_cost|floatformat}}</span>
 							</div>
 						</div>
 						<div class = "col-sm-2">
@@ -91,7 +91,7 @@
 						<input hidden name = "tax" value = "{{tax}}">
 						<input hidden name = "disc_amt" value = "{{disc_amt}}">
 						<input hidden id = "order_total" name = "order_total" value = "{{order_total}}">
-						<input hidden id = "shipping_cost" name = "shipping_cost" value = "{{shipping_cost}}">
+						<input hidden id = "shipping_cost" name = "shipping_cost" value = "{{order_shipping_cost}}">
 						<input hidden id = "shipper_id" name = "shipper_id" value = "0">
 						<h1>Checkout - Shipping</h1>
 
@@ -102,7 +102,7 @@
 							</a>
 							<a href="#" class="nav-link flex-sm-fill text-sm-center active"> 
 								<i class="fa fa-truck"></i>
-								Shipping Method
+								Shipping
 							</a>
 							<!-- <a href="#" class="nav-link flex-sm-fill text-sm-center disabled"> 
 								<i class="fa fa-money"></i>
@@ -138,7 +138,7 @@
 										<thead>
 											<tr>
 												<th width="5%">Select</th>
-												<th width="15%">Shipping Method</th>
+												<th width="15%">Shipping</th>
 												<th width="15%" style = "text-align:right">Cost</th>
 												<th width="30%">Timeline</th>
 											</tr>
@@ -151,7 +151,7 @@
 														<input id="radio_priority" name = "radio_shipping" 
 															type="radio" class="form-control"
 															onchange = "add_ship_handling(250);"
-															value = "{{shipping_addr.full_name}}">
+															value = "">
 													</div>		
 												</td>
 												<td>

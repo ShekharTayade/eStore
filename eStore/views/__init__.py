@@ -4,6 +4,7 @@ from .menu_views import *
 from .product_views import *
 from .cart_views import *
 from .importImageDataFromCsv import *
+from .importImageDataFromCsv_NEW import *
 from .frame_views import *
 from .image_views import *
 from .checkout_views import *
@@ -12,3 +13,4 @@ from .promotion_views import *
 from .profile_group_views import *
 from .user_image_views import *
 from .wishlist_views import *
+from .import_publisher import *

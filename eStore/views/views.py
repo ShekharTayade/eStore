@@ -54,9 +54,6 @@ def show_prod_details(request):
 
 	return render(request, "show_prod_details.html")
 	
-def basket(request):
-
-	return render(request, "basket.html")
 
 def show_frame(request) :
 	return render(request, "show_frame.html")

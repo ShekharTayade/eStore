@@ -234,6 +234,13 @@ class Shipping_method (models.Model):
 	def __str__(self):
 		return self.name
 
+class Shipping_cost_slabs (models.Model):
+	slab_from = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
+	slab_to = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
+	flat_shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
+	effective_from = models.DateField(blank=True, null=True)
+	effective_to = models.DateField(blank=True, null=True)
+	
 	
 class Shipper (models.Model):
 	shipper_id = models.AutoField(primary_key=True, null=False)
@@ -416,9 +423,18 @@ class Product(models.Model):
 	has_variants = models.BooleanField(null=False, default=False)
 	size = models.CharField(max_length = 200, null=True)
 	default_frame = models.ForeignKey(Frame, models.CASCADE, null=True)
-
-		
-
+	aspect_ratio = models.DecimalField(max_digits = 21, decimal_places=18, null=True)
+	image_type =  models.CharField(max_length = 1, null=True)
+	orientation = models.CharField(max_length = 20, null=True)
+	max_width = models.DecimalField(max_digits = 6, decimal_places=2, null=True)
+	max_height = models.DecimalField(max_digits = 6, decimal_places=2, null=True)
+	min_width = models.DecimalField(max_digits = 6, decimal_places=2, null=True)
+	publisher = models.CharField(max_length = 600, null=True)
+	artist = models.CharField(max_length = 600, null=True)
+	colors = models.CharField(max_length = 600, null=True)
+	key_words = models.CharField(max_length = 2000, null=True)
+	
+	
 class Product_product_category(models.Model):
 	product = models.ForeignKey(Product, models.CASCADE, null=False)
 	product_category = models.ForeignKey(Product_category, models.CASCADE, null=True) 
@@ -699,11 +715,10 @@ class Cart_item(models.Model):
 
 	class Meta:
 		unique_together = ("cart_item_id", "cart")	
-
-		
 		
 class Order (models.Model):
 	order_id = models.AutoField(primary_key=True, null=False)
+	order_number = models.CharField(max_length = 15, blank = True, default = '')
 	order_date =  models.DateField(blank=True, null=True)
 	cart = models.ForeignKey(Cart,on_delete=models.PROTECT, null=False)
 	store = models.ForeignKey(Ecom_site, models.PROTECT)
@@ -721,7 +736,7 @@ class Order (models.Model):
 	shipper = models.ForeignKey(Shipper, models.PROTECT, null=True) #Null is allowed, in case it's a store pickup	
 	shipping_status = models. ForeignKey(Shipping_status, models.PROTECT, null=True) #Null is allowed, in case it's a store pickup
 	updated_date =  models.DateField(blank=True, null=True)
-	order_status = models.CharField(max_length = 2, blank=True, default='PP') #"PP" Payment Pending, "AB":Abandoned, "CO" Complete
+	order_status = models.CharField(max_length = 2, blank=True, default='PP') #"PP" Payment Pending, "AB":Abandoned, "PC": Payment Complete, "SH": Shipping in progress,  "CO" Complete 
 	
 class Order_items (models.Model):
 	order_item_id = models.AutoField(primary_key=True, null=False)
@@ -842,7 +857,7 @@ class Profile_group (models.Model):
 
 	
 class Business_profile(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
+	user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, related_name="business_user")
 	contact_name = models.CharField(max_length=500, blank=False)
 	company =  models.CharField(max_length=30, blank=True)
 	profile_group = models.ForeignKey(Profile_group, models.CASCADE, null=True)
@@ -856,7 +871,9 @@ class Business_profile(models.Model):
 	# email_id  = models.EmailField(blank=True, default='')  -- Same as 'User' email
 	gst_number = models.CharField(max_length=600, blank=True, default='')
 	tax_id = models.CharField(max_length=600, blank=True, default='')
-	
+	approval_date = models.DateField(blank=True, null=True)
+	created_date = models.DateTimeField(auto_now_add=True, null=False)	
+	updated_date = models.DateTimeField(auto_now=True, null=False)	
 	
 class Generate_number_by_month(models.Model):
 	type = models.CharField(max_length = 50, null=False, primary_key = True)

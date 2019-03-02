@@ -38,24 +38,25 @@ $(function () {
 
 
     $('.product-slider').owlCarousel({
-        items: 1,
-        dots: false,
+        items: 2,
+        dots: true,
         nav: true,
 		navText: ["<i class='fa fa-chevron-left' aria-hidden='true'></i>","<i class='fa fa-chevron-right' aria-hidden='true'></i>"],
 		loop:true,
         autoplay: true,
+		autoWidth: false,
         responsive: {
             480: {
-                items: 1
-            },
-            765: {
                 items: 2
             },
-            991: {
+            765: {
                 items: 4
             },
-            1200: {
+            991: {
                 items: 7
+            },
+            1200: {
+                items: 10
             }
         }
     });
