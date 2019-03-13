@@ -82,7 +82,7 @@ h1 {
 *
 */
 #top {
-  background: RGB(80,80,80);
+  background: #252525;
   /*#fff;*/
   padding: 0px 1rem;
   /*border-bottom: 1px solid #e0e0e0;*/
@@ -162,7 +162,7 @@ h1 {
 */
 .navbar {
   border-bottom: 1px solid #e6e6e6;
-  background-color: #1c3464;
+  background-color: #fff;
   /** #fff;  **/
 }
 
@@ -171,7 +171,7 @@ h1 {
   letter-spacing: 0.1em;
   font-weight: 500;
   /* padding: 15px 15px !important; */
-  color: #fff !important;
+  color: #252525 !important;
   /** #555; **/
 }
 

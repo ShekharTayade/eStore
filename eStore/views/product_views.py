@@ -180,9 +180,6 @@ def category_products(request, cat_id):
 		width = 0
 		products = Product.objects.filter(product_id__in = category_prods, is_published = True)
 	
-		import pdb
-		pdb.set_trace()
-	
 		t_f = Q()
 		for majorkey, subdict in json_data.items():
 			#######################################

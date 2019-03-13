@@ -1,11 +1,63 @@
 {% load static %}
+		<nav class="navbar navbar-expand-lg navbar-light bg-light ">
+			  <a class="navbar-brand" href="{% url 'index' %}"><img src="..img/logo.png"></a>
+				<a href="{% url 'show_cart' %}" class="cart_top ml-auto d-xl-none d-lg-none"><img src="images/cart_icon.png"><span>{% if usercart %} {{usercart.quantity}} {%else%} 0</span></a>
+			  <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+			  </button>
+
+			  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+				
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					  Art
+					</a>
+					{% for main in level0_menuitems %}
+						{% if main.name|upper == 'ART' %}
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+					  <a class="dropdown-item" href="#">Art 1</a>
+					  <a class="dropdown-item" href="#">Art 2</a>
+					</div>
+				  </li>
+				  
+				  <li class="nav-item">
+					<a class="nav-link" href="#">Frame</a>
+				  </li>
+				  <li class="nav-item">
+					<a class="nav-link" href="#">Sale</a>
+				  </li>
+				  
+				    <li class="nav-item">
+					<a class="nav-link" href="#">Wish List</a>
+				  </li>
+				  
+				  <li class="nav-item">
+					<a class="nav-link" href="#">For Business</a>
+				  </li>
+				</ul>
+				<form class="form-inline search_form">
+				  <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+				  <button class="btn btn-outline-success" type="submit"><img src="images/search_head.png"></button>
+				</form>
+				
+				<a href="#" class="cart_top d-xl-block d-lg-block d-none"><img src="images/cart_icon.png"><span>2</span></a>
+			  </div>
+		  </div>
+		</nav>
+
+
+
+
+
+
 <!-- Navigation - Logo, menu, search and cart buttons -->
 <nav class="navbar navbar-expand-lg">
 
 	<!-- ecom site logo -->
 	<a href="{% url 'index' %}" class="navbar-brand home">
-		<img src="{% static 'img/logo.png' %}" alt="logo" class="d-none d-md-inline-block">
-		<img src="{% static 'img/logo_mobile.png' %}" alt="{{ecom_site.store_name}}" class="d-inline-block d-md-none">
+		<img src="{% static 'img/artevenuelogo_1.png' %}" alt="logo" class="d-none d-md-inline-block">
+		<img src="{% static 'img/artevenuelogo_small.png' %}" alt="{{ecom_site.store_name}}" class="d-inline-block d-md-none">
 		<span class="sr-only">{{ecom_site.store_name}} - go to homepage</span>
 	</a>
 	
@@ -112,22 +164,18 @@
 		</ul>	
 		
 		<div class="navbar-buttons d-flex justify-content-end">
-			<form role="search" class="form-inline search_form" action = "{% url 'products_by_keywords' %}">
-				<!-- <div class="input-group"> -->
+			<form role="search" action = "{% url 'products_by_keywords' %}">
+				<div class="input-group">
 					<input type="text" placeholder="Ex. Blue Abstract" id ="keywords" name="keywords" class="form-control" required>
-					<!-- <div class="input-group-append"> -->
-						<!-- <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button> -->
-						<button class="btn btn-outline-success" type="submit"><img src="{% static 'img/search_head.png' %}"></button>
-
-					<!-- </div>-->
-				<!--</div>-->
+					<div class="input-group-append">
+						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+					</div>
+				</div>
 			</form>
 		
 			<!-- /.nav-collapse-->
 			<div id="basket-overview" class="navbar-collapse collapse d-none d-lg-block">
-				<!--<a href="{% url 'show_cart' %}" class="btn btn-primary navbar-btn"><i class="fa fa-shopping-cart"></i><span id="itemsincart">{% if usercart %} {{usercart.quantity}} {%else%} 0 {%endif %} items in cart </span></a>-->
-				<a href="{% url 'show_cart' %}" class="cart_top d-xl-block d-lg-block d-none"><img src="{% static 'img/cart_icon.png' %}"><span id="itemsincart">{% if usercart %} {{usercart.quantity}} {%else%} 0 {%endif %}</span></a>
-				
+				<a href="{% url 'show_cart' %}" class="btn btn-primary navbar-btn"><i class="fa fa-shopping-cart"></i><span id="itemsincart">{% if usercart %} {{usercart.quantity}} {%else%} 0 {%endif %} items in cart </span></a>
 			</div>
 		</div>
 		

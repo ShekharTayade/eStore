@@ -417,6 +417,7 @@ top #phone-help .modal-header h5 {
   /*Set the size of the magnifier glass:*/
   width: 150px;
   height: 150px;
+  z-index: 1;
 }
 
 
@@ -715,12 +716,12 @@ top #phone-help .modal-header h5 {
   padding: 10px 15px;
   font-size: 0.75 rem;
   font-weight: 500;
-  color: #fff;
+  color: #252525;
   letter-spacing: 0.1rem;
 } 
 
 #all{
-	padding: 0 2rem;
+	padding: 0 0rem;
 }
 
 .quote-leftbar {
@@ -767,4 +768,8 @@ hr {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;	
+}
+
+.product-slider {
+	margin-bottom: 40px;
 }
